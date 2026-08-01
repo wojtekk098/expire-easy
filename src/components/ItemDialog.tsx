@@ -79,7 +79,7 @@ export function ItemDialog({
       name: name.trim(),
       category: finalCategory,
       expiry_date: expiry,
-      notes: notes.trim() || undefined,
+      notes: notes.trim(),
       reminder_days_before: reminders.length ? reminders : [7],
     };
     if (item) {
