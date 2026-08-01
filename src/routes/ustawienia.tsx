@@ -29,9 +29,49 @@ export const Route = createFileRoute("/ustawienia")({
 
 function SettingsPage() {
   const { categories, items, addCategory, deleteCategory } = useDeadlines();
-  const [email, setEmail] = useState("anna@mojafirma.pl");
+  const [email, setEmail] = useState("");
   const [emailOn, setEmailOn] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const save = useServerFn(saveReminderSubscription);
+  const load = useServerFn(getReminderSubscription);
+
+  useEffect(() => {
+    const token = localStorage.getItem(REMINDER_TOKEN_KEY);
+    if (!token) return;
+    load({ data: { token } })
+      .then((sub) => {
+        if (!sub) return;
+        setEmail(sub.email);
+        setEmailOn(sub.enabled);
+      })
+      .catch(() => undefined);
+  }, [load]);
+
+  async function handleSave() {
+    const value = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      toast.error("Podaj poprawny adres e-mail");
+      return;
+    }
+    setSaving(true);
+    try {
+      const token = localStorage.getItem(REMINDER_TOKEN_KEY);
+      const result = await save({
+        data: { ...(token ? { token } : {}), email: value, enabled: emailOn, items },
+      });
+      localStorage.setItem(REMINDER_TOKEN_KEY, result.token);
+      toast.success(
+        emailOn
+          ? "Zapisano — przypomnienia będą wysyłane na ten adres"
+          : "Zapisano — przypomnienia e-mail są wyłączone",
+      );
+    } catch {
+      toast.error("Nie udało się zapisać ustawień. Spróbuj ponownie.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -50,7 +90,8 @@ function SettingsPage() {
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold">Przypomnienia e-mail</h2>
             <p className="text-sm text-muted-foreground">
-              Wyślemy krótką wiadomość, np. „Polisa OC wygasa za 7 dni”.
+              Codziennie rano sprawdzamy terminy i wysyłamy krótką wiadomość, np. „Polisa OC wygasa
+              za 7 dni”.
             </p>
           </div>
           <Switch checked={emailOn} onCheckedChange={setEmailOn} aria-label="Włącz e-maile" />
@@ -61,26 +102,22 @@ function SettingsPage() {
           <Input
             id="email"
             type="email"
+            placeholder="np. anna@mojafirma.pl"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={!emailOn}
           />
         </div>
 
-        {/*
-          TODO (integracja powiadomień):
-          Tutaj wejdzie zapis ustawień oraz wysyłka przypomnień przez
-          Supabase Edge Function (np. `send-reminders`), uruchamianą codziennie
-          przez pg_cron. Funkcja policzy dla każdej pozycji dni do expiry_date,
-          dopasuje je do reminder_days_before i wyśle e-mail (Resend).
-          Na tym etapie nie wysyłamy żadnych realnych wiadomości.
-        */}
         <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-          Wysyłka e-maili jest jeszcze wyłączona — przygotowujemy ją. SMS i inne kanały dodamy
-          później.
+          Wysyłamy tylko dni wskazane w polu „Przypomnij” każdej pozycji. Przypomnienia SMS dodamy w
+          kolejnym kroku.
         </p>
-        <Button onClick={() => toast.success("Ustawienia zapisane")}>Zapisz ustawienia</Button>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Zapisywanie…" : "Zapisz ustawienia"}
+        </Button>
       </section>
+
 
       <section className="panel space-y-4 p-5">
         <div>
