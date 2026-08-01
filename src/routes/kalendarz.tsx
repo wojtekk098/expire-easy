@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ItemDialog } from "@/components/ItemDialog";
 import { ItemRow } from "@/components/ItemRow";
+import { ItemDetailsSheet } from "@/components/ItemDetailsSheet";
 import { useDeadlines } from "@/lib/deadline-store";
 import {
   STATUS_META,
@@ -58,6 +59,8 @@ function CalendarPage() {
   const [selected, setSelected] = useState<string | null>(toISO(today));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const [viewing, setViewing] = useState<Item | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const byDate = useMemo(() => {
     const map = new Map<string, Item[]>();
@@ -193,11 +196,27 @@ function CalendarPage() {
                   setDialogOpen(true);
                 }}
                 onDelete={() => deleteItem(item.id)}
+                onOpen={() => {
+                  setViewing(item);
+                  setDetailsOpen(true);
+                }}
               />
             ))}
           </ul>
         )}
       </section>
+
+      <ItemDetailsSheet
+        item={viewing}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onEdit={() => {
+          setDetailsOpen(false);
+          setEditing(viewing);
+          setDialogOpen(true);
+        }}
+        onDelete={() => viewing && deleteItem(viewing.id)}
+      />
 
       <ItemDialog
         open={dialogOpen}
