@@ -108,6 +108,19 @@ export function DeadlineProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state, ready]);
 
+  // Trzymamy kopię terminów w chmurze, żeby codzienna wysyłka przypomnień
+  // wiedziała, co i kiedy wygasa.
+  useEffect(() => {
+    if (!ready) return;
+    const token = localStorage.getItem(REMINDER_TOKEN_KEY);
+    if (!token) return;
+    const timer = setTimeout(() => {
+      syncReminderItems({ data: { token, items: state.items } }).catch(() => undefined);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [state.items, ready]);
+
+
   const value = useMemo<Store>(
     () => ({
       ...state,
