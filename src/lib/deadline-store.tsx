@@ -5,8 +5,11 @@ import {
   toISO,
   type Item,
 } from "./deadline-types";
+import { syncReminderItems } from "./reminders.functions";
 
 const STORAGE_KEY = "deadline.v1";
+export const REMINDER_TOKEN_KEY = "deadline.reminderToken";
+
 
 function shift(days: number): string {
   const d = new Date();
@@ -104,6 +107,19 @@ export function DeadlineProvider({ children }: { children: ReactNode }) {
     if (!ready) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state, ready]);
+
+  // Trzymamy kopię terminów w chmurze, żeby codzienna wysyłka przypomnień
+  // wiedziała, co i kiedy wygasa.
+  useEffect(() => {
+    if (!ready) return;
+    const token = localStorage.getItem(REMINDER_TOKEN_KEY);
+    if (!token) return;
+    const timer = setTimeout(() => {
+      syncReminderItems({ data: { token, items: state.items } }).catch(() => undefined);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [state.items, ready]);
+
 
   const value = useMemo<Store>(
     () => ({
