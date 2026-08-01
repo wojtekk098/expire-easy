@@ -5,8 +5,11 @@ import {
   toISO,
   type Item,
 } from "./deadline-types";
+import { syncReminderItems } from "./reminders.functions";
 
 const STORAGE_KEY = "deadline.v1";
+export const REMINDER_TOKEN_KEY = "deadline.reminderToken";
+
 
 function shift(days: number): string {
   const d = new Date();
