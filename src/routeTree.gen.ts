@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KalendarzRouteImport } from './routes/kalendarz'
+import { Route as PozycjeRouteImport } from './routes/pozycje'
+import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KalendarzRoute = KalendarzRouteImport.update({
+  id: '/kalendarz',
+  path: '/kalendarz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PozycjeRoute = PozycjeRouteImport.update({
+  id: '/pozycje',
+  path: '/pozycje',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UstawieniaRoute = UstawieniaRouteImport.update({
+  id: '/ustawienia',
+  path: '/ustawienia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/kalendarz': typeof KalendarzRoute
+  '/pozycje': typeof PozycjeRoute
+  '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/kalendarz': typeof KalendarzRoute
+  '/pozycje': typeof PozycjeRoute
+  '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/kalendarz': typeof KalendarzRoute
+  '/pozycje': typeof PozycjeRoute
+  '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/kalendarz' | '/pozycje' | '/ustawienia'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/kalendarz' | '/pozycje' | '/ustawienia'
+  id: '__root__' | '/' | '/kalendarz' | '/pozycje' | '/ustawienia'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  KalendarzRoute: typeof KalendarzRoute
+  PozycjeRoute: typeof PozycjeRoute
+  UstawieniaRoute: typeof UstawieniaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kalendarz': {
+      id: '/kalendarz'
+      path: '/kalendarz'
+      fullPath: '/kalendarz'
+      preLoaderRoute: typeof KalendarzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pozycje': {
+      id: '/pozycje'
+      path: '/pozycje'
+      fullPath: '/pozycje'
+      preLoaderRoute: typeof PozycjeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ustawienia': {
+      id: '/ustawienia'
+      path: '/ustawienia'
+      fullPath: '/ustawienia'
+      preLoaderRoute: typeof UstawieniaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  KalendarzRoute: KalendarzRoute,
+  PozycjeRoute: PozycjeRoute,
+  UstawieniaRoute: UstawieniaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

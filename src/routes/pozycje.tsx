@@ -16,11 +16,11 @@ import { ItemRow } from "@/components/ItemRow";
 import { useDeadlines } from "@/lib/deadline-store";
 import { daysLeft, getStatus, STATUS_META, type Item, type ItemStatus } from "@/lib/deadline-types";
 
-type Search = { status?: string };
+type SearchParams = { status: string };
 
 export const Route = createFileRoute("/pozycje")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
-    status: typeof search.status === "string" ? search.status : undefined,
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
+    status: typeof search["status"] === "string" ? (search["status"] as string) : "all",
   }),
   head: () => ({
     meta: [
