@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { ItemDialog } from "@/components/ItemDialog";
 import { ItemRow } from "@/components/ItemRow";
+import { ItemDetailsSheet } from "@/components/ItemDetailsSheet";
 import { useDeadlines } from "@/lib/deadline-store";
 import { daysLeft, getStatus, STATUS_META, type Item, type ItemStatus } from "@/lib/deadline-types";
 
@@ -51,6 +52,8 @@ function ItemsPage() {
   const [sort, setSort] = useState<"date-asc" | "date-desc" | "name">("date-asc");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const [viewing, setViewing] = useState<Item | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const visible = useMemo(() => {
     let list = [...items];
@@ -166,10 +169,26 @@ function ItemsPage() {
                 setDialogOpen(true);
               }}
               onDelete={() => deleteItem(item.id)}
+              onOpen={() => {
+                setViewing(item);
+                setDetailsOpen(true);
+              }}
             />
           ))}
         </ul>
       )}
+
+      <ItemDetailsSheet
+        item={viewing}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onEdit={() => {
+          setDetailsOpen(false);
+          setEditing(viewing);
+          setDialogOpen(true);
+        }}
+        onDelete={() => viewing && deleteItem(viewing.id)}
+      />
 
       <ItemDialog open={dialogOpen} onOpenChange={setDialogOpen} item={editing} />
     </div>

@@ -5,6 +5,7 @@ import { CalendarClock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ItemDialog } from "@/components/ItemDialog";
 import { ItemRow } from "@/components/ItemRow";
+import { ItemDetailsSheet } from "@/components/ItemDetailsSheet";
 import { useDeadlines } from "@/lib/deadline-store";
 import { STATUS_META, daysLeft, getStatus, type Item, type ItemStatus } from "@/lib/deadline-types";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,8 @@ function Dashboard() {
   const { items, deleteItem, ready } = useDeadlines();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const [viewing, setViewing] = useState<Item | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const counts = useMemo(() => {
     const base: Record<ItemStatus, number> = { expired: 0, urgent: 0, soon: 0, valid: 0 };
@@ -136,11 +139,27 @@ function Dashboard() {
                   setDialogOpen(true);
                 }}
                 onDelete={() => deleteItem(item.id)}
+                onOpen={() => {
+                  setViewing(item);
+                  setDetailsOpen(true);
+                }}
               />
             ))}
           </ul>
         )}
       </section>
+
+      <ItemDetailsSheet
+        item={viewing}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onEdit={() => {
+          setDetailsOpen(false);
+          setEditing(viewing);
+          setDialogOpen(true);
+        }}
+        onDelete={() => viewing && deleteItem(viewing.id)}
+      />
 
       <ItemDialog open={dialogOpen} onOpenChange={setDialogOpen} item={editing} />
     </div>
