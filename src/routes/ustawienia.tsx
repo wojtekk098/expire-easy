@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Mail, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -7,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useDeadlines } from "@/lib/deadline-store";
+import { useDeadlines, REMINDER_TOKEN_KEY } from "@/lib/deadline-store";
+import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
+
 
 export const Route = createFileRoute("/ustawienia")({
   head: () => ({
