@@ -20,10 +20,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useDeadlines } from "@/lib/deadline-store";
 import { COLOR_TAGS } from "@/lib/item-visuals";
-import { DEFAULT_REMINDERS, toISO, type Item } from "@/lib/deadline-types";
+import {
+  DEFAULT_REMINDERS,
+  RECURRENCE_OPTIONS,
+  toISO,
+  type Item,
+  type RecurrenceRule,
+} from "@/lib/deadline-types";
+
 
 const NEW_CATEGORY = "__new__";
 const REMINDER_OPTIONS = [60, 30, 14, 7, 3, 1];
