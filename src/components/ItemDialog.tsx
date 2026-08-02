@@ -84,12 +84,18 @@ export function ItemDialog({
       return;
     }
     const payload = {
+      ...(item ?? {}),
       name: name.trim(),
       category: finalCategory,
       expiry_date: expiry,
       notes: notes.trim(),
       reminder_days_before: reminders.length ? reminders : [7],
+      color_tag: colorTag,
+      start_time: startTime || null,
+      end_time: endTime || null,
     };
+    delete (payload as { id?: string }).id;
+
     if (item) {
       updateItem(item.id, payload);
       toast.success("Zmiany zapisane");
