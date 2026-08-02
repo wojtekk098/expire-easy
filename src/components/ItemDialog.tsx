@@ -235,7 +235,91 @@ export function ItemDialog({
                 </button>
               ))}
             </div>
+
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <div>
+              <Label>Kontakt (opcjonalny)</Label>
+              <p className="text-xs text-muted-foreground">
+                Osoba lub firma, z którą trzeba się skontaktować w sprawie terminu.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-name" className="text-xs font-normal text-muted-foreground">
+                Imię / nazwa
+              </Label>
+              <Input
+                id="contact-name"
+                placeholder="np. Anna Kowalska, PZU"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="contact-email"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  E-mail
+                </Label>
+                <Input
+                  id="contact-email"
+                  type="email"
+                  placeholder="agent@firma.pl"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="contact-phone"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  Telefon
+                </Label>
+                <Input
+                  id="contact-phone"
+                  type="tel"
+                  placeholder="+48 600 100 200"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
+
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="item-recurring"
+                checked={isRecurring}
+                onCheckedChange={(v) => setIsRecurring(v === true)}
+              />
+              <Label htmlFor="item-recurring">Powtarzaj</Label>
+            </div>
+            {isRecurring && (
+              <div className="space-y-2">
+                <Label className="text-xs font-normal text-muted-foreground">Częstotliwość</Label>
+                <Select value={recurrence} onValueChange={(v) => setRecurrence(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wybierz częstotliwość" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECURRENCE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Przypomnienia wyślemy także dla kolejnych wystąpień tego terminu.
+                </p>
+              </div>
+            )}
+          </div>
+
+
 
 
 
