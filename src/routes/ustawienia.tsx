@@ -168,9 +168,10 @@ function SettingsPage() {
         </div>
 
         <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-          Wysyłamy tylko dni wskazane w polu „Przypomnij” każdej pozycji. Przypomnienia SMS dodamy w
-          kolejnym kroku.
+          Wysyłamy tylko dni wskazane w polu „Przypomnij” każdej pozycji. Przypomnienia SMS są
+          częścią planu Pro.
         </p>
+
         <Button onClick={handleSave} disabled={saving}>
           {saving ? "Zapisywanie…" : "Zapisz ustawienia"}
         </Button>
