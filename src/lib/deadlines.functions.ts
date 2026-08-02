@@ -34,6 +34,10 @@ const updateSchema = z.object({
   patch: z.object(basePayload).partial(),
 });
 
+function compact<T extends Record<string, unknown>>(obj: T): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+}
+
 const SELECT =
   "id, name, category, expiry_date, notes, reminder_days_before, contact_name, contact_email, contact_phone, status, color_tag, is_recurring, recurrence_rule, start_time, end_time, created_at, updated_at";
 
@@ -55,7 +59,7 @@ export const createDeadline = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("deadlines")
-      .insert({ ...data, user_id: context.userId })
+      .insert({ ...compact(data), user_id: context.userId } as never)
       .select(SELECT)
       .single();
     if (error) throw new Error(error.message);
@@ -68,7 +72,7 @@ export const updateDeadline = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("deadlines")
-      .update(data.patch)
+      .update(compact(data.patch) as never)
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .select(SELECT)
