@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useDeadlines } from "@/lib/deadline-store";
+import { COLOR_TAGS } from "@/lib/item-visuals";
 import { DEFAULT_REMINDERS, toISO, type Item } from "@/lib/deadline-types";
 
 const NEW_CATEGORY = "__new__";
@@ -45,6 +46,9 @@ export function ItemDialog({
   const [expiry, setExpiry] = useState("");
   const [notes, setNotes] = useState("");
   const [reminders, setReminders] = useState<number[]>(DEFAULT_REMINDERS);
+  const [colorTag, setColorTag] = useState<string>("blue");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -54,7 +58,11 @@ export function ItemDialog({
     setExpiry(item?.expiry_date ?? defaultDate ?? toISO(new Date()));
     setNotes(item?.notes ?? "");
     setReminders(item?.reminder_days_before ?? DEFAULT_REMINDERS);
+    setColorTag(item?.color_tag ?? "blue");
+    setStartTime(item?.start_time?.slice(0, 5) ?? "");
+    setEndTime(item?.end_time?.slice(0, 5) ?? "");
   }, [open, item, defaultDate, categories]);
+
 
   const toggleReminder = (day: number) =>
     setReminders((prev) =>
