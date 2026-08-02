@@ -17,6 +17,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DeadlineProvider } from "@/lib/deadline-store";
+import { ThemeProvider } from "@/lib/theme";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 
 function NotFoundComponent() {
   return (
@@ -130,33 +133,40 @@ function RootComponent() {
   if (pathname === "/auth") {
     return (
       <QueryClientProvider client={queryClient}>
-        <Outlet />
-        <Toaster />
+        <ThemeProvider>
+          <Outlet />
+          <Toaster />
+        </ThemeProvider>
       </QueryClientProvider>
     );
   }
 
   return (
-
     <QueryClientProvider client={queryClient}>
-      <DeadlineProvider>
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full bg-background">
-            <AppSidebar />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background/85 px-3 backdrop-blur md:px-6">
-                <SidebarTrigger />
-                <span className="text-sm font-medium text-muted-foreground">Deadline</span>
-              </header>
-              <main className="min-w-0 flex-1 px-3 py-6 md:px-6 md:py-8">
-                {/* Required: nested routes render here. */}
-                <Outlet />
-              </main>
+      <ThemeProvider>
+        <DeadlineProvider>
+          <SidebarProvider>
+            <div className="flex min-h-screen w-full bg-background">
+              <AppSidebar />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background/85 px-3 backdrop-blur md:px-6">
+                  <SidebarTrigger />
+                  <span className="text-sm font-medium text-muted-foreground">Deadline</span>
+                  <div className="ml-auto">
+                    <ThemeToggle />
+                  </div>
+                </header>
+                <main className="min-w-0 flex-1 px-3 py-6 md:px-6 md:py-8">
+                  {/* Required: nested routes render here. */}
+                  <Outlet />
+                </main>
+              </div>
             </div>
-          </div>
-        </SidebarProvider>
-        <Toaster />
-      </DeadlineProvider>
+          </SidebarProvider>
+          <Toaster />
+        </DeadlineProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+

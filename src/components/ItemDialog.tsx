@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useDeadlines } from "@/lib/deadline-store";
+import { COLOR_TAGS } from "@/lib/item-visuals";
 import { DEFAULT_REMINDERS, toISO, type Item } from "@/lib/deadline-types";
 
 const NEW_CATEGORY = "__new__";
@@ -45,6 +46,9 @@ export function ItemDialog({
   const [expiry, setExpiry] = useState("");
   const [notes, setNotes] = useState("");
   const [reminders, setReminders] = useState<number[]>(DEFAULT_REMINDERS);
+  const [colorTag, setColorTag] = useState<string>("blue");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -54,7 +58,11 @@ export function ItemDialog({
     setExpiry(item?.expiry_date ?? defaultDate ?? toISO(new Date()));
     setNotes(item?.notes ?? "");
     setReminders(item?.reminder_days_before ?? DEFAULT_REMINDERS);
+    setColorTag(item?.color_tag ?? "blue");
+    setStartTime(item?.start_time?.slice(0, 5) ?? "");
+    setEndTime(item?.end_time?.slice(0, 5) ?? "");
   }, [open, item, defaultDate, categories]);
+
 
   const toggleReminder = (day: number) =>
     setReminders((prev) =>
@@ -76,12 +84,18 @@ export function ItemDialog({
       return;
     }
     const payload = {
+      ...(item ?? {}),
       name: name.trim(),
       category: finalCategory,
       expiry_date: expiry,
       notes: notes.trim(),
       reminder_days_before: reminders.length ? reminders : [7],
+      color_tag: colorTag,
+      start_time: startTime || null,
+      end_time: endTime || null,
     };
+    delete (payload as { id?: string }).id;
+
     if (item) {
       updateItem(item.id, payload);
       toast.success("Zmiany zapisane");
@@ -148,6 +162,54 @@ export function ItemDialog({
               />
             </div>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="item-start">Godzina od (opcjonalna)</Label>
+              <Input
+                id="item-start"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-end">Godzina do (opcjonalna)</Label>
+              <Input
+                id="item-end"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Kolor oznaczenia</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_TAGS.map((tag) => (
+                <button
+                  key={tag.value}
+                  type="button"
+                  onClick={() => setColorTag(tag.value)}
+                  aria-label={tag.label}
+                  aria-pressed={colorTag === tag.value}
+                  title={tag.label}
+                  className={cn(
+                    "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    colorTag === tag.value
+                      ? cn(tag.border, tag.soft, tag.text)
+                      : "border-border bg-card text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  <span className={cn("size-2.5 rounded-full", tag.dot)} />
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+
 
           <div className="space-y-2">
             <Label htmlFor="item-notes">Notatka (opcjonalna)</Label>
