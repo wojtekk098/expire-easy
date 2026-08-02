@@ -41,8 +41,34 @@ function SettingsPage() {
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [provider, setProvider] = useState<{
+    configured: boolean;
+    keyPreview: string | null;
+    from: string;
+  } | null>(null);
   const save = useServerFn(saveReminderSubscription);
   const load = useServerFn(getReminderSubscription);
+  const sendTest = useServerFn(sendTestReminderEmail);
+  const providerStatus = useServerFn(getEmailProviderStatus);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  useEffect(() => {
+    providerStatus().then(setProvider).catch(() => undefined);
+  }, [providerStatus]);
+
+  useEffect(() => {
+    if (user?.email) setEmail((current) => current || user.email!);
+  }, [user]);
 
   useEffect(() => {
     const token = localStorage.getItem(REMINDER_TOKEN_KEY);
@@ -55,6 +81,7 @@ function SettingsPage() {
       })
       .catch(() => undefined);
   }, [load]);
+
 
   async function handleSave() {
     const value = email.trim();
