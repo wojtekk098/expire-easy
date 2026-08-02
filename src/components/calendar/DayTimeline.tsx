@@ -162,7 +162,7 @@ export function DayTimeline({
             {untimed.map((item) => {
               const meta = colorTagMeta(item.color_tag);
               return (
-                <li key={item.id}>
+                <li key={item.id} className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() =>
@@ -178,7 +178,9 @@ export function DayTimeline({
                     <span className={cn("size-2 rounded-full", meta.dot)} />
                     {item.name}
                   </button>
+                  <ContactActions item={item} compact />
                 </li>
+
               );
             })}
           </ul>
