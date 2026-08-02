@@ -57,6 +57,11 @@ export function ItemDialog({
   const [colorTag, setColorTag] = useState<string>("blue");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrence, setRecurrence] = useState<RecurrenceRule>("monthly");
 
   useEffect(() => {
     if (!open) return;
@@ -69,6 +74,11 @@ export function ItemDialog({
     setColorTag(item?.color_tag ?? "blue");
     setStartTime(item?.start_time?.slice(0, 5) ?? "");
     setEndTime(item?.end_time?.slice(0, 5) ?? "");
+    setContactName(item?.contact_name ?? "");
+    setContactEmail(item?.contact_email ?? "");
+    setContactPhone(item?.contact_phone ?? "");
+    setIsRecurring(Boolean(item?.is_recurring));
+    setRecurrence((item?.recurrence_rule as RecurrenceRule) ?? "monthly");
   }, [open, item, defaultDate, categories]);
 
 
@@ -91,6 +101,10 @@ export function ItemDialog({
       toast.error("Wybierz datę ważności");
       return;
     }
+    if (contactEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+      toast.error("Podaj poprawny e-mail kontaktu");
+      return;
+    }
     const payload = {
       ...(item ?? {}),
       name: name.trim(),
@@ -101,7 +115,13 @@ export function ItemDialog({
       color_tag: colorTag,
       start_time: startTime || null,
       end_time: endTime || null,
+      contact_name: contactName.trim() || null,
+      contact_email: contactEmail.trim() || null,
+      contact_phone: contactPhone.trim() || null,
+      is_recurring: isRecurring,
+      recurrence_rule: isRecurring ? recurrence : null,
     };
+
     delete (payload as { id?: string }).id;
 
     if (item) {
