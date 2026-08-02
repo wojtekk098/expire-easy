@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
+import { ContactActions } from "@/components/ContactActions";
 import { colorTagMeta, formatTimeRange } from "@/lib/item-visuals";
+
 import { STATUS_META, getStatus, toISO, type Item } from "@/lib/deadline-types";
 
 const WEEKDAYS = ["pon", "wt", "śr", "czw", "pt", "sob", "ndz"];
