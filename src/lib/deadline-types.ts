@@ -21,6 +21,20 @@ export const DEADLINE_STATUS_LABELS: Record<DeadlineStatus, string> = {
 
 export type RecurrenceRule = "weekly" | "monthly" | "quarterly" | "yearly" | (string & {});
 
+export const RECURRENCE_OPTIONS: { value: RecurrenceRule; label: string }[] = [
+  { value: "weekly", label: "Co tydzień" },
+  { value: "monthly", label: "Co miesiąc" },
+  { value: "quarterly", label: "Co kwartał" },
+];
+
+export const RECURRENCE_LABELS: Record<string, string> = {
+  weekly: "Co tydzień",
+  monthly: "Co miesiąc",
+  quarterly: "Co kwartał",
+  yearly: "Co rok",
+};
+
+
 export type Item = {
   id: string;
   name: string;
