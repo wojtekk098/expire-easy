@@ -1,5 +1,26 @@
 export type ItemStatus = "expired" | "urgent" | "soon" | "valid";
 
+/** Status obsługi terminu (odpowiada enumowi `deadline_status` w bazie). */
+export type DeadlineStatus = "pending" | "in_progress" | "confirmed" | "rescheduled" | "done";
+
+export const DEADLINE_STATUSES: DeadlineStatus[] = [
+  "pending",
+  "in_progress",
+  "confirmed",
+  "rescheduled",
+  "done",
+];
+
+export const DEADLINE_STATUS_LABELS: Record<DeadlineStatus, string> = {
+  pending: "Oczekuje",
+  in_progress: "W toku",
+  confirmed: "Potwierdzony",
+  rescheduled: "Przeniesiony",
+  done: "Zrobione",
+};
+
+export type RecurrenceRule = "weekly" | "monthly" | "quarterly" | "yearly" | (string & {});
+
 export type Item = {
   id: string;
   name: string;
@@ -7,7 +28,18 @@ export type Item = {
   expiry_date: string; // YYYY-MM-DD
   notes?: string;
   reminder_days_before: number[];
+  // Rozszerzenia (wszystkie opcjonalne — stare rekordy działają bez zmian)
+  contact_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  status?: DeadlineStatus | null;
+  color_tag?: string | null;
+  is_recurring?: boolean | null;
+  recurrence_rule?: RecurrenceRule | null;
+  start_time?: string | null; // HH:MM lub HH:MM:SS
+  end_time?: string | null;
 };
+
 
 export const DEFAULT_CATEGORIES = [
   "Ubezpieczenia",

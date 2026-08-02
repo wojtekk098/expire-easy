@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      deadlines: {
+        Row: {
+          category: string
+          color_tag: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          end_time: string | null
+          expiry_date: string
+          id: string
+          is_recurring: boolean
+          name: string
+          notes: string | null
+          recurrence_rule: string | null
+          reminder_days_before: number[]
+          start_time: string | null
+          status: Database["public"]["Enums"]["deadline_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          color_tag?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          end_time?: string | null
+          expiry_date: string
+          id?: string
+          is_recurring?: boolean
+          name: string
+          notes?: string | null
+          recurrence_rule?: string | null
+          reminder_days_before?: number[]
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["deadline_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          color_tag?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          end_time?: string | null
+          expiry_date?: string
+          id?: string
+          is_recurring?: boolean
+          name?: string
+          notes?: string | null
+          recurrence_rule?: string | null
+          reminder_days_before?: number[]
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["deadline_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reminder_sends: {
         Row: {
           created_at: string
@@ -96,7 +159,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      deadline_status:
+        | "pending"
+        | "in_progress"
+        | "confirmed"
+        | "rescheduled"
+        | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -223,6 +291,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      deadline_status: [
+        "pending",
+        "in_progress",
+        "confirmed",
+        "rescheduled",
+        "done",
+      ],
+    },
   },
 } as const
