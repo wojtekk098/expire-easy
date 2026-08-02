@@ -1,5 +1,14 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, LayoutDashboard, ListChecks, Settings, ShieldCheck } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  CalendarDays,
+  LayoutDashboard,
+  ListChecks,
+  LogIn,
+  LogOut,
+  Settings,
+  ShieldCheck,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -12,6 +21,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth, initials } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -22,6 +33,17 @@ const items = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
 
   return (
     <Sidebar collapsible="icon">
