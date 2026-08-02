@@ -235,6 +235,9 @@ export function ItemDialog({
                 </button>
               ))}
             </div>
+          </div>
+
+
 
           <div className="space-y-3 rounded-lg border border-border p-3">
             <div>
