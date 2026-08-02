@@ -298,6 +298,136 @@ function SettingsPage() {
         ) : null}
       </section>
 
+      <section className="panel space-y-4 p-5">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+            <Sparkles className="size-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold">Deadline Pro</h2>
+            <p className="text-sm text-muted-foreground">
+              {pro
+                ? "Dostęp aktywny — SMS-y, CSV, PDF i kalendarz są do Twojej dyspozycji."
+                : `SMS-y, eksport i import CSV, raport PDF oraz Google Calendar za ${PRO_PRICE_PLN} zł/mies.`}
+            </p>
+          </div>
+        </div>
+
+        {!pro ? (
+          <Button asChild>
+            <Link to="/pro">Zobacz plan Pro</Link>
+          </Button>
+        ) : (
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center gap-1.5">
+                <Smartphone className="size-3.5" />
+                Numer telefonu do SMS
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="np. +48 601 234 567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <Button
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() => {
+                    if (!/^\+?[\d\s-]{9,}$/.test(phone.trim())) {
+                      toast.error("Podaj numer w formacie międzynarodowym, np. +48601234567");
+                      return;
+                    }
+                    localStorage.setItem("deadline.smsPhone", phone.trim());
+                    toast.success("Numer zapisany — SMS-y ruszą po podłączeniu bramki Twilio");
+                  }}
+                >
+                  Zapisz numer
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Do faktycznej wysyłki potrzebny jest klucz Twilio — napisz w czacie „wklejam klucz
+                Twilio”, a otworzę bezpieczny formularz.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Eksport i import</p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    downloadFile("deadline-terminy.csv", itemsToCSV(items), "text/csv");
+                    toast.success("Pobrano plik CSV");
+                  }}
+                >
+                  <FileDown className="size-4" />
+                  Eksport CSV
+                </Button>
+                <Button variant="outline" onClick={() => fileInput.current?.click()}>
+                  <FileUp className="size-4" />
+                  Import CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (!openPDFReport(items))
+                      toast.error("Przeglądarka zablokowała okno — zezwól na wyskakujące okna");
+                  }}
+                >
+                  <FileDown className="size-4" />
+                  Raport PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    downloadFile("deadline-terminy.ics", itemsToICS(items), "text/calendar");
+                    toast.success("Pobrano plik .ics — zaimportuj go w Google Calendar");
+                  }}
+                >
+                  <CalendarPlus className="size-4" />
+                  Google Calendar (.ics)
+                </Button>
+              </div>
+              <input
+                ref={fileInput}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  try {
+                    const { items: parsed, skipped } = csvToItems(await file.text());
+                    if (parsed.length === 0) {
+                      toast.error("Nie znaleziono poprawnych wierszy w pliku");
+                      return;
+                    }
+                    parsed.forEach(addItem);
+                    toast.success(
+                      `Zaimportowano ${parsed.length} pozycji${
+                        skipped ? `, pominięto ${skipped}` : ""
+                      }`,
+                    );
+                  } catch {
+                    toast.error("Nie udało się odczytać pliku CSV");
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Format CSV: nazwa; kategoria; data_waznosci (RRRR-MM-DD); przypomnienia_dni
+                (np. 30|7|1); notatki.
+              </p>
+            </div>
+          </div>
+        )}
+      </section>
+
+
+
       <section className="panel space-y-3 p-5">
         <h2 className="text-base font-semibold">Konto</h2>
         {user ? (
