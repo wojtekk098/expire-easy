@@ -8,6 +8,7 @@ import {
   LogOut,
   Settings,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -28,8 +29,10 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Wszystkie pozycje", url: "/pozycje", icon: ListChecks },
   { title: "Kalendarz", url: "/kalendarz", icon: CalendarDays },
+  { title: "Deadline Pro", url: "/pro", icon: Sparkles },
   { title: "Ustawienia", url: "/ustawienia", icon: Settings },
 ];
+
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });

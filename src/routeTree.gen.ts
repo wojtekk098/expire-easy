@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KalendarzRouteImport } from './routes/kalendarz'
 import { Route as PozycjeRouteImport } from './routes/pozycje'
+import { Route as ProRouteImport } from './routes/pro'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const PozycjeRoute = PozycjeRouteImport.update({
   path: '/pozycje',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
   id: '/ustawienia',
   path: '/ustawienia',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
+  '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
+  '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,22 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
+  '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/ustawienia'
+  fullPaths: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/pro' | '/ustawienia'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/ustawienia'
-  id: '__root__' | '/' | '/auth' | '/kalendarz' | '/pozycje' | '/ustawienia'
+  to: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/pro' | '/ustawienia'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/kalendarz'
+    | '/pozycje'
+    | '/pro'
+    | '/ustawienia'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +92,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   KalendarzRoute: typeof KalendarzRoute
   PozycjeRoute: typeof PozycjeRoute
+  ProRoute: typeof ProRoute
   UstawieniaRoute: typeof UstawieniaRoute
 }
 
@@ -109,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PozycjeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ustawienia': {
       id: '/ustawienia'
       path: '/ustawienia'
@@ -124,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   KalendarzRoute: KalendarzRoute,
   PozycjeRoute: PozycjeRoute,
+  ProRoute: ProRoute,
   UstawieniaRoute: UstawieniaRoute,
 }
 export const routeTree = rootRouteImport
