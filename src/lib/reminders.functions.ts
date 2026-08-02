@@ -10,7 +10,13 @@ const itemSchema = z.object({
   expiry_date: z.string(),
   notes: z.string().optional(),
   reminder_days_before: z.array(z.number()),
+  contact_name: z.string().nullable().optional(),
+  contact_email: z.string().nullable().optional(),
+  contact_phone: z.string().nullable().optional(),
+  is_recurring: z.boolean().nullable().optional(),
+  recurrence_rule: z.string().nullable().optional(),
 });
+
 
 export const getReminderSubscription = createServerFn({ method: "POST" })
   .inputValidator((data: { token: string }) => z.object({ token: z.string().uuid() }).parse(data))
