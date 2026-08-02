@@ -55,7 +55,11 @@ export const Route = createFileRoute("/ustawienia")({
 });
 
 function SettingsPage() {
-  const { categories, items, addCategory, deleteCategory } = useDeadlines();
+  const { categories, items, addItem, addCategory, deleteCategory } = useDeadlines();
+  const { pro } = usePro();
+  const [phone, setPhone] = useState("");
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
   const [email, setEmail] = useState("");
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
