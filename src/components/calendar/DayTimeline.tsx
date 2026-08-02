@@ -1,7 +1,9 @@
 import { useRef } from "react";
 
 import { cn } from "@/lib/utils";
+import { ContactActions } from "@/components/ContactActions";
 import { colorTagMeta, minutesToTime, timeToMinutes } from "@/lib/item-visuals";
+
 import type { Item } from "@/lib/deadline-types";
 
 const START_HOUR = 7;
@@ -107,9 +109,8 @@ export function DayTimeline({
               const meta = colorTagMeta(item.color_tag);
               const overlapShift = (index % 3) * 6;
               return (
-                <button
+                <div
                   key={item.id}
-                  type="button"
                   draggable
                   onDragStart={(e) => {
                     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -120,9 +121,8 @@ export function DayTimeline({
                     e.dataTransfer.effectAllowed = "move";
                     e.dataTransfer.setData("text/plain", item.id);
                   }}
-                  onClick={() => onOpen(item)}
                   className={cn(
-                    "absolute left-1 right-1 cursor-grab overflow-hidden rounded-md border-l-4 px-2 py-1 text-left text-xs shadow-sm transition-colors active:cursor-grabbing",
+                    "absolute left-1 right-1 flex cursor-grab items-start gap-1 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left text-xs shadow-sm transition-colors active:cursor-grabbing",
                     meta.soft,
                     meta.border,
                     meta.text,
@@ -133,13 +133,21 @@ export function DayTimeline({
                     marginLeft: overlapShift,
                   }}
                 >
-                  <span className="block truncate font-medium">{item.name}</span>
-                  <span className="block truncate opacity-80">
-                    {minutesToTime(start)}–{minutesToTime(start + len)} · {item.category}
-                  </span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(item)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <span className="block truncate font-medium">{item.name}</span>
+                    <span className="block truncate opacity-80">
+                      {minutesToTime(start)}–{minutesToTime(start + len)} · {item.category}
+                    </span>
+                  </button>
+                  <ContactActions item={item} compact />
+                </div>
               );
             })}
+
           </div>
         </div>
       </div>
@@ -154,7 +162,7 @@ export function DayTimeline({
             {untimed.map((item) => {
               const meta = colorTagMeta(item.color_tag);
               return (
-                <li key={item.id}>
+                <li key={item.id} className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() =>
@@ -170,7 +178,9 @@ export function DayTimeline({
                     <span className={cn("size-2 rounded-full", meta.dot)} />
                     {item.name}
                   </button>
+                  <ContactActions item={item} compact />
                 </li>
+
               );
             })}
           </ul>

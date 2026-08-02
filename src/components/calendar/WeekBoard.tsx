@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
+import { ContactActions } from "@/components/ContactActions";
 import { colorTagMeta, formatTimeRange } from "@/lib/item-visuals";
+
 import { STATUS_META, getStatus, toISO, type Item } from "@/lib/deadline-types";
 
 const WEEKDAYS = ["pon", "wt", "śr", "czw", "pt", "sob", "ndz"];
@@ -56,24 +58,30 @@ export function WeekBoard({
                 const range = formatTimeRange(item.start_time, item.end_time);
                 return (
                   <li key={item.id}>
-                    <button
-                      type="button"
-                      onClick={() => onOpen(item)}
+                    <div
                       className={cn(
-                        "w-full rounded-md border-l-4 px-2 py-1 text-left text-[11px]",
+                        "rounded-md border-l-4",
                         meta.soft,
                         meta.border,
                         meta.text,
                       )}
                     >
-                      <span className="block truncate font-medium">{item.name}</span>
-                      <span className="block truncate opacity-80">
-                        {range ?? STATUS_META[getStatus(item.expiry_date)].label}
-                      </span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => onOpen(item)}
+                        className="w-full px-2 py-1 text-left text-[11px]"
+                      >
+                        <span className="block truncate font-medium">{item.name}</span>
+                        <span className="block truncate opacity-80">
+                          {range ?? STATUS_META[getStatus(item.expiry_date)].label}
+                        </span>
+                      </button>
+                      <ContactActions item={item} compact className="px-1 pb-1" />
+                    </div>
                   </li>
                 );
               })}
+
             </ul>
           </div>
         );

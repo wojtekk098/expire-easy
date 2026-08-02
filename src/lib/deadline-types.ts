@@ -21,6 +21,20 @@ export const DEADLINE_STATUS_LABELS: Record<DeadlineStatus, string> = {
 
 export type RecurrenceRule = "weekly" | "monthly" | "quarterly" | "yearly" | (string & {});
 
+export const RECURRENCE_OPTIONS: { value: RecurrenceRule; label: string }[] = [
+  { value: "weekly", label: "Co tydzień" },
+  { value: "monthly", label: "Co miesiąc" },
+  { value: "quarterly", label: "Co kwartał" },
+];
+
+export const RECURRENCE_LABELS: Record<string, string> = {
+  weekly: "Co tydzień",
+  monthly: "Co miesiąc",
+  quarterly: "Co kwartał",
+  yearly: "Co rok",
+};
+
+
 export type Item = {
   id: string;
   name: string;
@@ -135,4 +149,25 @@ export function friendlyMessage(item: Item): string {
 
 export function plDni(n: number): string {
   return n === 1 ? "dzień" : "dni";
+}
+
+/** Kolejne wystąpienia terminu cyklicznego (bez pierwszego, źródłowego). */
+export function recurrenceOccurrences(
+  iso: string,
+  rule: RecurrenceRule | null | undefined,
+  count = 6,
+): string[] {
+  if (!rule) return [];
+  const base = parseDate(iso);
+  const out: string[] = [];
+  for (let n = 1; n <= count; n += 1) {
+    const d = new Date(base);
+    if (rule === "weekly") d.setDate(d.getDate() + 7 * n);
+    else if (rule === "monthly") d.setMonth(d.getMonth() + n);
+    else if (rule === "quarterly") d.setMonth(d.getMonth() + 3 * n);
+    else if (rule === "yearly") d.setFullYear(d.getFullYear() + n);
+    else return [];
+    out.push(toISO(d));
+  }
+  return out;
 }

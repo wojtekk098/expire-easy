@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ContactActions } from "@/components/ContactActions";
 import { formatPL, friendlyMessage, type Item } from "@/lib/deadline-types";
+
 
 export function ItemRow({
   item,
@@ -38,7 +40,9 @@ export function ItemRow({
         ) : null}
       </button>
       <div className="flex shrink-0 items-center gap-2">
+        <ContactActions item={item} />
         <StatusBadge expiryDate={item.expiry_date} className="hidden sm:inline-flex" />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Więcej opcji">

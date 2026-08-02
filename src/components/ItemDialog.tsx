@@ -20,10 +20,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useDeadlines } from "@/lib/deadline-store";
 import { COLOR_TAGS } from "@/lib/item-visuals";
-import { DEFAULT_REMINDERS, toISO, type Item } from "@/lib/deadline-types";
+import {
+  DEFAULT_REMINDERS,
+  RECURRENCE_OPTIONS,
+  toISO,
+  type Item,
+  type RecurrenceRule,
+} from "@/lib/deadline-types";
+
 
 const NEW_CATEGORY = "__new__";
 const REMINDER_OPTIONS = [60, 30, 14, 7, 3, 1];
@@ -49,6 +57,11 @@ export function ItemDialog({
   const [colorTag, setColorTag] = useState<string>("blue");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrence, setRecurrence] = useState<RecurrenceRule>("monthly");
 
   useEffect(() => {
     if (!open) return;
@@ -61,6 +74,11 @@ export function ItemDialog({
     setColorTag(item?.color_tag ?? "blue");
     setStartTime(item?.start_time?.slice(0, 5) ?? "");
     setEndTime(item?.end_time?.slice(0, 5) ?? "");
+    setContactName(item?.contact_name ?? "");
+    setContactEmail(item?.contact_email ?? "");
+    setContactPhone(item?.contact_phone ?? "");
+    setIsRecurring(Boolean(item?.is_recurring));
+    setRecurrence((item?.recurrence_rule as RecurrenceRule) ?? "monthly");
   }, [open, item, defaultDate, categories]);
 
 
@@ -83,6 +101,10 @@ export function ItemDialog({
       toast.error("Wybierz datę ważności");
       return;
     }
+    if (contactEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+      toast.error("Podaj poprawny e-mail kontaktu");
+      return;
+    }
     const payload = {
       ...(item ?? {}),
       name: name.trim(),
@@ -93,7 +115,13 @@ export function ItemDialog({
       color_tag: colorTag,
       start_time: startTime || null,
       end_time: endTime || null,
+      contact_name: contactName.trim() || null,
+      contact_email: contactEmail.trim() || null,
+      contact_phone: contactPhone.trim() || null,
+      is_recurring: isRecurring,
+      recurrence_rule: isRecurring ? recurrence : null,
     };
+
     delete (payload as { id?: string }).id;
 
     if (item) {
@@ -208,6 +236,93 @@ export function ItemDialog({
               ))}
             </div>
           </div>
+
+
+
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <div>
+              <Label>Kontakt (opcjonalny)</Label>
+              <p className="text-xs text-muted-foreground">
+                Osoba lub firma, z którą trzeba się skontaktować w sprawie terminu.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-name" className="text-xs font-normal text-muted-foreground">
+                Imię / nazwa
+              </Label>
+              <Input
+                id="contact-name"
+                placeholder="np. Anna Kowalska, PZU"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="contact-email"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  E-mail
+                </Label>
+                <Input
+                  id="contact-email"
+                  type="email"
+                  placeholder="agent@firma.pl"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="contact-phone"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  Telefon
+                </Label>
+                <Input
+                  id="contact-phone"
+                  type="tel"
+                  placeholder="+48 600 100 200"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="item-recurring"
+                checked={isRecurring}
+                onCheckedChange={(v) => setIsRecurring(v === true)}
+              />
+              <Label htmlFor="item-recurring">Powtarzaj</Label>
+            </div>
+            {isRecurring && (
+              <div className="space-y-2">
+                <Label className="text-xs font-normal text-muted-foreground">Częstotliwość</Label>
+                <Select value={recurrence} onValueChange={(v) => setRecurrence(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wybierz częstotliwość" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECURRENCE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Przypomnienia wyślemy także dla kolejnych wystąpień tego terminu.
+                </p>
+              </div>
+            )}
+          </div>
+
+
 
 
 
