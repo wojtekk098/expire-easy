@@ -188,13 +188,84 @@ function SettingsPage() {
         </ul>
       </section>
 
-      <section className="panel p-5">
-        <h2 className="text-base font-semibold">Konto</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Anna Kowalska · anna@mojafirma.pl — na razie jedno konto testowe. Logowanie i praca
-          zespołowa pojawią się później.
-        </p>
+      <section className="panel space-y-4 p-5">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground">
+            <KeyRound className="size-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold">Klucz API do wysyłki (Resend)</h2>
+            <p className="text-sm text-muted-foreground">
+              Klucz przechowujemy bezpiecznie na serwerze — nigdy nie trafia do przeglądarki.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-muted px-3 py-2 text-sm">
+          {provider === null ? (
+            <span className="text-muted-foreground">Sprawdzam konfigurację…</span>
+          ) : provider.configured ? (
+            <span>
+              Klucz zapisany (<code className="font-mono text-xs">{provider.keyPreview}</code>),
+              nadawca: <span className="font-medium">{provider.from}</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              Brak klucza — napisz w czacie „chcę wkleić klucz Resend”, a otworzę bezpieczny
+              formularz.
+            </span>
+          )}
+        </div>
+
+        <Button
+          variant="outline"
+          disabled={!user || testing || !provider?.configured}
+          onClick={async () => {
+            if (!user?.email) return;
+            setTesting(true);
+            try {
+              const result = await sendTest({ data: { email: user.email } });
+              if (result.sent) toast.success(`Wysłaliśmy testowy e-mail na ${user.email}`);
+              else toast.error(result.reason);
+            } catch {
+              toast.error("Nie udało się wysłać e-maila testowego");
+            } finally {
+              setTesting(false);
+            }
+          }}
+        >
+          {testing ? "Wysyłam…" : "Wyślij e-mail testowy"}
+        </Button>
+        {!user ? (
+          <p className="text-xs text-muted-foreground">
+            Zaloguj się, aby wysłać wiadomość testową na adres swojego konta.
+          </p>
+        ) : null}
       </section>
+
+      <section className="panel space-y-3 p-5">
+        <h2 className="text-base font-semibold">Konto</h2>
+        {user ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Zalogowano jako <span className="font-medium text-foreground">{user.email}</span>.
+            </p>
+            <Button variant="outline" onClick={handleSignOut}>
+              Wyloguj się
+            </Button>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Utwórz konto, aby zapisać terminy i przypomnienia na stałe — e-mailem lub przez Google.
+            </p>
+            <Button asChild>
+              <Link to="/auth">Utwórz konto / zaloguj się</Link>
+            </Button>
+          </>
+        )}
+      </section>
+
     </div>
   );
 }
