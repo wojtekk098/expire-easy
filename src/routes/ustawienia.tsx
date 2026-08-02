@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Mail, Plus, Trash2 } from "lucide-react";
+import { KeyRound, Mail, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useDeadlines, REMINDER_TOKEN_KEY } from "@/lib/deadline-store";
+import { getEmailProviderStatus, sendTestReminderEmail } from "@/lib/email.functions";
 import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
+
 
 
 export const Route = createFileRoute("/ustawienia")({
