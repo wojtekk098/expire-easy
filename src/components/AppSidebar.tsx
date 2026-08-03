@@ -1,13 +1,11 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  CalendarDays,
   LayoutDashboard,
   ListChecks,
   LogIn,
   LogOut,
   Settings,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
