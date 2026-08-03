@@ -162,6 +162,24 @@ function RootComponent() {
                   {/* Required: nested routes render here. */}
                   <Outlet />
                 </main>
+                <footer className="border-t border-border px-3 py-5 md:px-6">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                    <span>© {new Date().getFullYear()} Deadline</span>
+                    <Link to="/regulamin" className="hover:text-foreground">
+                      Regulamin
+                    </Link>
+                    <Link to="/prywatnosc" className="hover:text-foreground">
+                      Polityka prywatności
+                    </Link>
+                    <Link to="/zwroty" className="hover:text-foreground">
+                      Zwroty i reklamacje
+                    </Link>
+                    <Link to="/pro" className="hover:text-foreground">
+                      Cennik
+                    </Link>
+                  </div>
+                </footer>
+
               </div>
             </div>
           </SidebarProvider>

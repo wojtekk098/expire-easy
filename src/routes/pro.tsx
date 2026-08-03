@@ -149,12 +149,17 @@ function ProPage() {
                 {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
               </Button>
               <p className="text-xs text-muted-foreground">
-                Płatność obsługuje Paddle (sprzedawca), więc faktura i VAT są ogarnięte
-                automatycznie. Anulujesz w każdej chwili.
+                Proces zamówienia obsługuje nasz sprzedawca internetowy Paddle.com — Paddle.com jest
+                sprzedawcą (Merchant of Record) wszystkich zamówień, obsługuje zapytania obsługi
+                klienta oraz zwroty, a faktura i VAT są rozliczane automatycznie. Anulujesz w każdej
+                chwili. Obowiązuje <Link to="/regulamin">Regulamin</Link>,{" "}
+                <Link to="/zwroty">30-dniowa gwarancja zwrotu</Link> i{" "}
+                <Link to="/prywatnosc">Polityka prywatności</Link>.
                 {testMode
                   ? " Podgląd działa w trybie testowym — użyj karty 4242 4242 4242 4242."
                   : ""}
               </p>
+
             </>
           ) : (
             <>
