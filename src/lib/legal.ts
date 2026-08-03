@@ -1,7 +1,7 @@
 // Dane sprzedawcy używane na stronach prawnych (Regulamin, Polityka prywatności, Zwroty).
 // Zmień poniższe wartości na swoje dane rejestrowe.
 export const SELLER = {
-  legalName: "Deadline (mojdeadline.pl)",
+  legalName: "Wojciech Gielniak",
   tradingName: "Deadline",
   siteName: "Deadline",
   domain: "mojdeadline.pl",
