@@ -19,6 +19,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DeadlineProvider } from "@/lib/deadline-store";
 import { ThemeProvider } from "@/lib/theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 
 function NotFoundComponent() {
