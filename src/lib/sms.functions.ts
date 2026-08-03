@@ -52,6 +52,7 @@ export const sendTestSms = createServerFn({ method: "POST" })
       return {
         sent: false as const,
         reason: "Podaj numer w formacie międzynarodowym, np. +48601234567.",
+        diagnostics: null,
       };
     }
 
@@ -75,8 +76,17 @@ export const sendTestSms = createServerFn({ method: "POST" })
       const body = await response.text();
       console.error(`Twilio request failed [${response.status}]: ${body}`);
       let providerMessage = "";
+      let providerCode: number | null = null;
+      let moreInfo: string | null = null;
       try {
-        providerMessage = String((JSON.parse(body) as { message?: string }).message ?? "");
+        const parsed = JSON.parse(body) as {
+          message?: string;
+          code?: number;
+          more_info?: string;
+        };
+        providerMessage = String(parsed.message ?? "");
+        providerCode = typeof parsed.code === "number" ? parsed.code : null;
+        moreInfo = parsed.more_info ?? null;
       } catch {
         providerMessage = "";
       }
@@ -86,8 +96,18 @@ export const sendTestSms = createServerFn({ method: "POST" })
           response.status === 401
             ? "Twilio odrzucił dane dostępowe — sprawdź SID konta i klucz API."
             : providerMessage || `Wysyłka nie udała się (kod ${response.status}).`,
+        diagnostics: {
+          httpStatus: response.status,
+          providerCode,
+          providerMessage: providerMessage || null,
+          moreInfo,
+          to,
+          from,
+          rawBody: body.slice(0, 1500),
+        },
       };
     }
 
-    return { sent: true as const, to };
+    return { sent: true as const, to, diagnostics: null };
   });
+
