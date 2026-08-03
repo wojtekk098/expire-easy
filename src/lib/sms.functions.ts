@@ -67,7 +67,7 @@ export const sendTestSms = createServerFn({ method: "POST" })
         body: new URLSearchParams({
           To: to,
           From: from,
-          Body: "Deadline: testowe przypomnienie. Tak będą wyglądać SMS-y o Twoich terminach.",
+          Body: "Testowy SMS z Deadline.",
         }),
       },
     );
