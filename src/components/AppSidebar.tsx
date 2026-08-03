@@ -53,7 +53,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex min-w-0 items-center gap-2.5 px-1.5 py-2">
           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="size-4" />
+            <img src="/favicon.svg" alt="Deadline" className="size-5" />
           </span>
           <span className="truncate text-base font-semibold group-data-[collapsible=icon]:hidden">
             Deadline
