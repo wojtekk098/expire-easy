@@ -14,7 +14,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KalendarzRouteImport } from './routes/kalendarz'
 import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
+import { Route as PrywatnoscRouteImport } from './routes/prywatnosc'
+import { Route as RegulaminRouteImport } from './routes/regulamin'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
+import { Route as ZwrotyRouteImport } from './routes/zwroty'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,9 +45,24 @@ const ProRoute = ProRouteImport.update({
   path: '/pro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrywatnoscRoute = PrywatnoscRouteImport.update({
+  id: '/prywatnosc',
+  path: '/prywatnosc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegulaminRoute = RegulaminRouteImport.update({
+  id: '/regulamin',
+  path: '/regulamin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
   id: '/ustawienia',
   path: '/ustawienia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZwrotyRoute = ZwrotyRouteImport.update({
+  id: '/zwroty',
+  path: '/zwroty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
@@ -60,7 +78,10 @@ export interface FileRoutesByFullPath {
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
+  '/prywatnosc': typeof PrywatnoscRoute
+  '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/zwroty': typeof ZwrotyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -69,7 +90,10 @@ export interface FileRoutesByTo {
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
+  '/prywatnosc': typeof PrywatnoscRoute
+  '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/zwroty': typeof ZwrotyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -79,7 +103,10 @@ export interface FileRoutesById {
   '/kalendarz': typeof KalendarzRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
+  '/prywatnosc': typeof PrywatnoscRoute
+  '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/zwroty': typeof ZwrotyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -90,7 +117,10 @@ export interface FileRouteTypes {
     | '/kalendarz'
     | '/pozycje'
     | '/pro'
+    | '/prywatnosc'
+    | '/regulamin'
     | '/ustawienia'
+    | '/zwroty'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,7 +129,10 @@ export interface FileRouteTypes {
     | '/kalendarz'
     | '/pozycje'
     | '/pro'
+    | '/prywatnosc'
+    | '/regulamin'
     | '/ustawienia'
+    | '/zwroty'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -108,7 +141,10 @@ export interface FileRouteTypes {
     | '/kalendarz'
     | '/pozycje'
     | '/pro'
+    | '/prywatnosc'
+    | '/regulamin'
     | '/ustawienia'
+    | '/zwroty'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -118,7 +154,10 @@ export interface RootRouteChildren {
   KalendarzRoute: typeof KalendarzRoute
   PozycjeRoute: typeof PozycjeRoute
   ProRoute: typeof ProRoute
+  PrywatnoscRoute: typeof PrywatnoscRoute
+  RegulaminRoute: typeof RegulaminRoute
   UstawieniaRoute: typeof UstawieniaRoute
+  ZwrotyRoute: typeof ZwrotyRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -159,11 +198,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prywatnosc': {
+      id: '/prywatnosc'
+      path: '/prywatnosc'
+      fullPath: '/prywatnosc'
+      preLoaderRoute: typeof PrywatnoscRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regulamin': {
+      id: '/regulamin'
+      path: '/regulamin'
+      fullPath: '/regulamin'
+      preLoaderRoute: typeof RegulaminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ustawienia': {
       id: '/ustawienia'
       path: '/ustawienia'
       fullPath: '/ustawienia'
       preLoaderRoute: typeof UstawieniaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zwroty': {
+      id: '/zwroty'
+      path: '/zwroty'
+      fullPath: '/zwroty'
+      preLoaderRoute: typeof ZwrotyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -182,19 +242,12 @@ const rootRouteChildren: RootRouteChildren = {
   KalendarzRoute: KalendarzRoute,
   PozycjeRoute: PozycjeRoute,
   ProRoute: ProRoute,
+  PrywatnoscRoute: PrywatnoscRoute,
+  RegulaminRoute: RegulaminRoute,
   UstawieniaRoute: UstawieniaRoute,
+  ZwrotyRoute: ZwrotyRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
