@@ -320,11 +320,23 @@ function SettingsPage() {
           </Button>
         ) : (
           <div className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-1.5">
-                <Smartphone className="size-3.5" />
-                Numer telefonu do SMS
-              </Label>
+            <div className="space-y-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <Label htmlFor="phone" className="flex items-center gap-1.5">
+                    <Smartphone className="size-3.5" />
+                    Przypomnienia SMS
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Wysyłamy krótki SMS w dniach wskazanych w polu „Przypomnij”.
+                  </p>
+                </div>
+                <Switch
+                  checked={smsOn}
+                  onCheckedChange={setSmsOn}
+                  aria-label="Włącz przypomnienia SMS"
+                />
+              </div>
               <div className="flex gap-2">
                 <Input
                   id="phone"
@@ -332,27 +344,156 @@ function SettingsPage() {
                   placeholder="np. +48 601 234 567"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  disabled={!smsOn}
                 />
                 <Button
                   variant="outline"
                   className="shrink-0"
-                  onClick={() => {
-                    if (!/^\+?[\d\s-]{9,}$/.test(phone.trim())) {
-                      toast.error("Podaj numer w formacie międzynarodowym, np. +48601234567");
-                      return;
-                    }
-                    localStorage.setItem("deadline.smsPhone", phone.trim());
-                    toast.success("Numer zapisany — SMS-y ruszą po podłączeniu bramki Twilio");
-                  }}
+                  disabled={saving}
+                  onClick={() => void handleSave()}
                 >
                   Zapisz numer
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Do faktycznej wysyłki potrzebny jest klucz Twilio — napisz w czacie „wklejam klucz
-                Twilio”, a otworzę bezpieczny formularz.
-              </p>
+
+              <div className="rounded-lg bg-muted px-3 py-2 text-sm">
+                {sms === null ? (
+                  <span className="text-muted-foreground">Sprawdzam bramkę SMS…</span>
+                ) : sms.configured ? (
+                  <span>
+                    Bramka Twilio podłączona (konto{" "}
+                    <code className="font-mono text-xs">{sms.accountPreview}</code>), nadawca:{" "}
+                    <span className="font-medium">{sms.from}</span>
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">
+                    Bramka Twilio nie jest jeszcze gotowa — napisz w czacie „wklejam klucze Twilio”,
+                    a otworzę bezpieczny formularz.
+                  </span>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                disabled={!user || smsTesting || !sms?.configured || !phone.trim()}
+                onClick={async () => {
+                  setSmsTesting(true);
+                  try {
+                    const result = await sendSms({ data: { phone: phone.trim() } });
+                    if (result.sent) toast.success(`Wysłaliśmy testowy SMS na ${result.to}`);
+                    else toast.error(result.reason);
+                  } catch {
+                    toast.error("Nie udało się wysłać SMS-a testowego");
+                  } finally {
+                    setSmsTesting(false);
+                  }
+                }}
+              >
+                {smsTesting ? "Wysyłam…" : "Wyślij SMS testowy"}
+              </Button>
             </div>
+
+            <div className="space-y-3 border-t border-border pt-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-1.5 text-sm font-medium">
+                    <CalendarPlus className="size-3.5" />
+                    Google Calendar
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {gcal?.connected
+                      ? `Podłączony kalendarz: ${gcal.email ?? "kalendarz główny"}`
+                      : "Podłącz swoje konto Google i wysyłaj terminy prosto do kalendarza."}
+                  </p>
+                </div>
+              </div>
+
+              {gcal && !gcal.clientConfigured ? (
+                <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+                  Integracja Google Calendar jest jeszcze konfigurowana po naszej stronie.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {gcal?.connected ? (
+                    <>
+                      <Button
+                        disabled={gcalBusy}
+                        onClick={async () => {
+                          setGcalBusy(true);
+                          try {
+                            const result = await syncGcal({ data: { items: items.slice(0, 300) } });
+                            if (result.reason) toast.error(result.reason);
+                            else
+                              toast.success(
+                                `Zapisano ${result.synced} terminów w Google Calendar${
+                                  result.failed ? `, nie udało się ${result.failed}` : ""
+                                }`,
+                              );
+                          } catch {
+                            toast.error("Nie udało się zsynchronizować kalendarza");
+                          } finally {
+                            setGcalBusy(false);
+                          }
+                        }}
+                      >
+                        {gcalBusy ? "Synchronizuję…" : "Wyślij terminy do kalendarza"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        disabled={gcalBusy}
+                        onClick={async () => {
+                          setGcalBusy(true);
+                          try {
+                            await disconnectGcal();
+                            setGcal(await gcalStatus());
+                            toast.success("Kalendarz odłączony");
+                          } catch {
+                            toast.error("Nie udało się odłączyć kalendarza");
+                          } finally {
+                            setGcalBusy(false);
+                          }
+                        }}
+                      >
+                        Odłącz
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      disabled={gcalBusy || !user}
+                      onClick={async () => {
+                        const popup = openConnectorPopup();
+                        if (!popup) {
+                          toast.error("Przeglądarka zablokowała okno — zezwól na wyskakujące okna");
+                          return;
+                        }
+                        setGcalBusy(true);
+                        try {
+                          const { authorizationUrl } = await startGcal();
+                          const done = waitForOAuthCompletion(popup, "google_calendar");
+                          popup.location.href = authorizationUrl;
+                          await done;
+                          setGcal(await gcalStatus());
+                          toast.success("Kalendarz Google podłączony");
+                        } catch {
+                          popup.close();
+                          toast.error("Nie udało się podłączyć kalendarza");
+                        } finally {
+                          setGcalBusy(false);
+                        }
+                      }}
+                    >
+                      Podłącz Google Calendar
+                    </Button>
+                  )}
+                </div>
+              )}
+              {!user ? (
+                <p className="text-xs text-muted-foreground">
+                  Zaloguj się, aby połączyć kalendarz ze swoim kontem.
+                </p>
+              ) : null}
+            </div>
+
 
             <div className="space-y-2">
               <p className="text-sm font-medium">Eksport i import</p>
