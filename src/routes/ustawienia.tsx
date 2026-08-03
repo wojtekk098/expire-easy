@@ -440,10 +440,19 @@ function SettingsPage() {
                 onClick={async () => {
                   setSmsTesting(true);
                   setSmsError(null);
+                  setSmsTrialInfo(null);
                   try {
                     const result = await sendSms({ data: { phone: phone.trim() } });
-                    if (result.sent) toast.success(`Wysłaliśmy testowy SMS na ${result.to}`);
-                    else {
+                    if (result.sent) {
+                      if ("usedTrialTemplate" in result && result.usedTrialTemplate) {
+                        setSmsTrialInfo(
+                          "SMS testowy wysłany, ale konto Twilio jest w trybie trial — użyto predefiniowanego szablonu „sms_appointment_reminders”. Aby wysyłać własne treści, doładuj konto Twilio.",
+                        );
+                        toast.success("Wysłaliśmy testowy SMS (tryb trial Twilio)");
+                      } else {
+                        toast.success(`Wysłaliśmy testowy SMS na ${result.to}`);
+                      }
+                    } else {
                       toast.error(result.reason);
                       setSmsError({
                         reason: result.reason,
