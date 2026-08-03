@@ -31,6 +31,89 @@ export const getSmsProviderStatus = createServerFn({ method: "GET" }).handler(as
   };
 });
 
+interface TwilioResult {
+  sent: boolean;
+  to: string;
+  from: string;
+  usedTrialTemplate: boolean;
+  reason?: string;
+  diagnostics?: {
+    httpStatus: number;
+    providerCode: number | null;
+    providerMessage: string | null;
+    moreInfo: string | null;
+    to: string;
+    from: string;
+    rawBody: string;
+  };
+}
+
+async function sendTwilioMessage(
+  accountSid: string,
+  keySid: string,
+  keySecret: string,
+  from: string,
+  to: string,
+  body: string,
+): Promise<TwilioResult> {
+  const response = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${btoa(`${keySid}:${keySecret}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: to,
+        From: from,
+        Body: body,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const rawBody = await response.text();
+    console.error(`Twilio request failed [${response.status}]: ${rawBody}`);
+    let providerMessage = "";
+    let providerCode: number | null = null;
+    let moreInfo: string | null = null;
+    try {
+      const parsed = JSON.parse(rawBody) as {
+        message?: string;
+        code?: number;
+        more_info?: string;
+      };
+      providerMessage = String(parsed.message ?? "");
+      providerCode = typeof parsed.code === "number" ? parsed.code : null;
+      moreInfo = parsed.more_info ?? null;
+    } catch {
+      providerMessage = "";
+    }
+    return {
+      sent: false,
+      to,
+      from,
+      usedTrialTemplate: false,
+      reason:
+        response.status === 401
+          ? "Twilio odrzucił dane dostępowe — sprawdź SID konta i klucz API."
+          : providerMessage || `Wysyłka nie udała się (kod ${response.status}).`,
+      diagnostics: {
+        httpStatus: response.status,
+        providerCode,
+        providerMessage: providerMessage || null,
+        moreInfo,
+        to,
+        from,
+        rawBody: rawBody.slice(0, 1500),
+      },
+    };
+  }
+
+  return { sent: true, to, from, usedTrialTemplate: false };
+}
+
 /** Wysyła testowy SMS na podany numer zalogowanego użytkownika. */
 export const sendTestSms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -56,58 +139,52 @@ export const sendTestSms = createServerFn({ method: "POST" })
       };
     }
 
-    const response = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${btoa(`${keySid}:${keySecret}`)}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          To: to,
-          From: from,
-          Body: "Testowy SMS z Deadline.",
-        }),
-      },
+    // Konto pełne: wysyłamy własną treść.
+    const custom = await sendTwilioMessage(
+      accountSid,
+      keySid,
+      keySecret,
+      from,
+      to,
+      "Testowy SMS z Deadline.",
     );
+    if (custom.sent) {
+      return { sent: true as const, to, usedTrialTemplate: false as const, diagnostics: null };
+    }
 
-    if (!response.ok) {
-      const body = await response.text();
-      console.error(`Twilio request failed [${response.status}]: ${body}`);
-      let providerMessage = "";
-      let providerCode: number | null = null;
-      let moreInfo: string | null = null;
-      try {
-        const parsed = JSON.parse(body) as {
-          message?: string;
-          code?: number;
-          more_info?: string;
+    // Twilio trial wymaga używania predefiniowanych szablonów (błąd 572006).
+    // Jednym z dostępnych szablonów jest „sms_appointment_reminders” — pasuje do przypomnień.
+    const isTrialTemplateError = custom.diagnostics?.providerCode === 572006;
+    if (isTrialTemplateError) {
+      const trial = await sendTwilioMessage(
+        accountSid,
+        keySid,
+        keySecret,
+        from,
+        to,
+        "sms_appointment_reminders",
+      );
+      if (trial.sent) {
+        return {
+          sent: true as const,
+          to,
+          usedTrialTemplate: true as const,
+          diagnostics: null,
         };
-        providerMessage = String(parsed.message ?? "");
-        providerCode = typeof parsed.code === "number" ? parsed.code : null;
-        moreInfo = parsed.more_info ?? null;
-      } catch {
-        providerMessage = "";
       }
+      // Jeśli szablon też nie przeszedł, zwróć błąd z pierwszej próby z dopiskiem.
       return {
         sent: false as const,
         reason:
-          response.status === 401
-            ? "Twilio odrzucił dane dostępowe — sprawdź SID konta i klucz API."
-            : providerMessage || `Wysyłka nie udała się (kod ${response.status}).`,
-        diagnostics: {
-          httpStatus: response.status,
-          providerCode,
-          providerMessage: providerMessage || null,
-          moreInfo,
-          to,
-          from,
-          rawBody: body.slice(0, 1500),
-        },
+          "Konto Twilio jest w trybie trial i nie akceptuje niestandardowej treści. " +
+          "Spróbuj też szablonu „sms_appointment_reminders” lub doładuj konto Twilio.",
+        diagnostics: custom.diagnostics ?? null,
       };
     }
 
-    return { sent: true as const, to, diagnostics: null };
+    return {
+      sent: false as const,
+      reason: custom.reason ?? "Wysyłka nie udała się.",
+      diagnostics: custom.diagnostics ?? null,
+    };
   });
-
