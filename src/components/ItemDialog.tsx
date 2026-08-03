@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DocumentScanner } from "@/components/DocumentScanner";
 import { cn } from "@/lib/utils";
+
 import { useDeadlines } from "@/lib/deadline-store";
 import { COLOR_TAGS } from "@/lib/item-visuals";
 import {
@@ -145,7 +147,24 @@ export function ItemDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          <DocumentScanner
+            onResult={(result) => {
+              if (result.expiryDate) setExpiry(result.expiryDate);
+              if (result.suggestedName && !name.trim()) setName(result.suggestedName);
+              if (result.documentNumber) {
+                setNotes((prev) =>
+                  prev.includes(result.documentNumber!)
+                    ? prev
+                    : [prev.trim(), `Nr dokumentu: ${result.documentNumber}`]
+                        .filter(Boolean)
+                        .join("\n"),
+                );
+              }
+            }}
+          />
+
           <div className="space-y-2">
+
             <Label htmlFor="item-name">Nazwa</Label>
             <Input
               id="item-name"
