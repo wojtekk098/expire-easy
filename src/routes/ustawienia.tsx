@@ -80,6 +80,7 @@ function SettingsPage() {
       rawBody: string;
     } | null;
   } | null>(null);
+  const [smsTrialInfo, setSmsTrialInfo] = useState<string | null>(null);
   const [sms, setSms] = useState<{
     configured: boolean;
     accountPreview: string | null;
