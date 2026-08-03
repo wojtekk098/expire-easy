@@ -68,6 +68,18 @@ function SettingsPage() {
   const [phone, setPhone] = useState("");
   const [smsOn, setSmsOn] = useState(false);
   const [smsTesting, setSmsTesting] = useState(false);
+  const [smsError, setSmsError] = useState<{
+    reason: string;
+    diagnostics: {
+      httpStatus: number;
+      providerCode: number | null;
+      providerMessage: string | null;
+      moreInfo: string | null;
+      to: string;
+      from: string;
+      rawBody: string;
+    } | null;
+  } | null>(null);
   const [sms, setSms] = useState<{
     configured: boolean;
     accountPreview: string | null;
