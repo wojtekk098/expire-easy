@@ -426,12 +426,20 @@ function SettingsPage() {
                 disabled={!user || smsTesting || !sms?.configured || !phone.trim()}
                 onClick={async () => {
                   setSmsTesting(true);
+                  setSmsError(null);
                   try {
                     const result = await sendSms({ data: { phone: phone.trim() } });
                     if (result.sent) toast.success(`Wysłaliśmy testowy SMS na ${result.to}`);
-                    else toast.error(result.reason);
-                  } catch {
+                    else {
+                      toast.error(result.reason);
+                      setSmsError({ reason: result.reason, diagnostics: result.diagnostics });
+                    }
+                  } catch (e) {
                     toast.error("Nie udało się wysłać SMS-a testowego");
+                    setSmsError({
+                      reason: e instanceof Error ? e.message : "Nieznany błąd połączenia",
+                      diagnostics: null,
+                    });
                   } finally {
                     setSmsTesting(false);
                   }
@@ -439,6 +447,31 @@ function SettingsPage() {
               >
                 {smsTesting ? "Wysyłam…" : "Wyślij SMS testowy"}
               </Button>
+
+              {smsError ? (
+                <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
+                  <p className="font-medium text-destructive">Odpowiedź Twilio: {smsError.reason}</p>
+                  {smsError.diagnostics ? (
+                    <>
+                      <ul className="space-y-0.5 text-xs text-muted-foreground">
+                        <li>Status HTTP: {smsError.diagnostics.httpStatus}</li>
+                        <li>Kod błędu Twilio: {smsError.diagnostics.providerCode ?? "brak"}</li>
+                        <li>Do: {smsError.diagnostics.to}</li>
+                        <li>Od: {smsError.diagnostics.from}</li>
+                        {smsError.diagnostics.moreInfo ? (
+                          <li className="break-all">
+                            Dokumentacja: {smsError.diagnostics.moreInfo}
+                          </li>
+                        ) : null}
+                      </ul>
+                      <pre className="max-h-40 overflow-auto rounded bg-muted p-2 font-mono text-[11px] whitespace-pre-wrap">
+                        {smsError.diagnostics.rawBody}
+                      </pre>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+
             </div>
 
             <div className="space-y-3 border-t border-border pt-4">
