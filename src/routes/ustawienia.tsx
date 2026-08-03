@@ -30,6 +30,14 @@ import {
   openPDFReport,
 } from "@/lib/data-transfer";
 import { getEmailProviderStatus, sendTestReminderEmail } from "@/lib/email.functions";
+import { getSmsProviderStatus, sendTestSms } from "@/lib/sms.functions";
+import {
+  disconnectGoogleCalendar,
+  getGoogleCalendarStatus,
+  startGoogleCalendarConnect,
+  syncItemsToGoogleCalendar,
+} from "@/lib/gcal.functions";
+import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/connector-popup";
 import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
 import { PRO_PRICE_PLN, usePro } from "@/lib/pro";
 
@@ -58,6 +66,19 @@ function SettingsPage() {
   const { categories, items, addItem, addCategory, deleteCategory } = useDeadlines();
   const { pro } = usePro();
   const [phone, setPhone] = useState("");
+  const [smsOn, setSmsOn] = useState(false);
+  const [smsTesting, setSmsTesting] = useState(false);
+  const [sms, setSms] = useState<{
+    configured: boolean;
+    accountPreview: string | null;
+    from: string | null;
+  } | null>(null);
+  const [gcal, setGcal] = useState<{
+    clientConfigured: boolean;
+    connected: boolean;
+    email: string | null;
+  } | null>(null);
+  const [gcalBusy, setGcalBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
   const [email, setEmail] = useState("");
@@ -74,6 +95,12 @@ function SettingsPage() {
   const load = useServerFn(getReminderSubscription);
   const sendTest = useServerFn(sendTestReminderEmail);
   const providerStatus = useServerFn(getEmailProviderStatus);
+  const smsStatus = useServerFn(getSmsProviderStatus);
+  const sendSms = useServerFn(sendTestSms);
+  const gcalStatus = useServerFn(getGoogleCalendarStatus);
+  const startGcal = useServerFn(startGoogleCalendarConnect);
+  const syncGcal = useServerFn(syncItemsToGoogleCalendar);
+  const disconnectGcal = useServerFn(disconnectGoogleCalendar);
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -90,6 +117,18 @@ function SettingsPage() {
   }, [providerStatus]);
 
   useEffect(() => {
+    smsStatus().then(setSms).catch(() => undefined);
+  }, [smsStatus]);
+
+  useEffect(() => {
+    if (!user) {
+      setGcal(null);
+      return;
+    }
+    gcalStatus().then(setGcal).catch(() => undefined);
+  }, [user, gcalStatus]);
+
+  useEffect(() => {
     if (user?.email) setEmail((current) => current || user.email!);
   }, [user]);
 
@@ -101,6 +140,8 @@ function SettingsPage() {
         if (!sub) return;
         setEmail(sub.email);
         setEmailOn(sub.enabled);
+        setPhone(sub.phone);
+        setSmsOn(sub.smsEnabled);
       })
       .catch(() => undefined);
   }, [load]);
@@ -116,7 +157,14 @@ function SettingsPage() {
     try {
       const token = localStorage.getItem(REMINDER_TOKEN_KEY);
       const result = await save({
-        data: { ...(token ? { token } : {}), email: value, enabled: emailOn, items },
+        data: {
+          ...(token ? { token } : {}),
+          email: value,
+          enabled: emailOn,
+          phone: phone.trim(),
+          smsEnabled: smsOn,
+          items,
+        },
       });
       localStorage.setItem(REMINDER_TOKEN_KEY, result.token);
       toast.success(
