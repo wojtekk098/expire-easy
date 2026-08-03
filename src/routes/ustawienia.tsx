@@ -473,6 +473,17 @@ function SettingsPage() {
                 {smsTesting ? "Wysyłam…" : "Wyślij SMS testowy"}
               </Button>
 
+              {smsTrialInfo ? (
+                <div className="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+                  <p className="font-medium text-amber-700 dark:text-amber-300">
+                    Tryb trial Twilio
+                  </p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-300/80">
+                    {smsTrialInfo}
+                  </p>
+                </div>
+              ) : null}
+
               {smsError ? (
                 <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
                   <p className="font-medium text-destructive">Odpowiedź Twilio: {smsError.reason}</p>
@@ -483,6 +494,13 @@ function SettingsPage() {
                         <li>Kod błędu Twilio: {smsError.diagnostics.providerCode ?? "brak"}</li>
                         <li>Do: {smsError.diagnostics.to}</li>
                         <li>Od: {smsError.diagnostics.from}</li>
+                        {smsError.diagnostics.providerCode === 572006 ? (
+                          <li>
+                            Konto Twilio jest w trybie trial. W trybie trial można wysyłać SMS-y
+                            tylko z predefiniowanych szablonów (np. „sms_appointment_reminders”).
+                            Aby używać własnych treści, doładuj konto Twilio.
+                          </li>
+                        ) : null}
                         {smsError.diagnostics.moreInfo ? (
                           <li className="break-all">
                             Dokumentacja: {smsError.diagnostics.moreInfo}
