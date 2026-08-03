@@ -1,9 +1,14 @@
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Sparkles } from "lucide-react";
+import { Check, ExternalLink, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { PRO_FEATURES, PRO_PRICE_PLN, usePro } from "@/lib/pro";
+import { useAuth } from "@/hooks/useAuth";
+import { getPaddleEnvironment, getPaddlePriceId, initializePaddle } from "@/lib/paddle";
+import { createPortalSession } from "@/lib/payments.functions";
+import { PRO_FEATURES, PRO_PRICE_ID, PRO_PRICE_PLN, usePro } from "@/lib/pro";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
@@ -27,7 +32,50 @@ export const Route = createFileRoute("/pro")({
 });
 
 function ProPage() {
-  const { pro, setPro } = usePro();
+  const { pro, subscription } = usePro();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const openPortal = useServerFn(createPortalSession);
+  const testMode = getPaddleEnvironment() === "sandbox";
+
+  async function handleSubscribe() {
+    if (!user) return;
+    setLoading(true);
+    try {
+      await initializePaddle();
+      const paddlePriceId = await getPaddlePriceId(PRO_PRICE_ID);
+      window.Paddle.Checkout.open({
+        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        customer: user.email ? { email: user.email } : undefined,
+        customData: { userId: user.id },
+        settings: {
+          displayMode: "overlay",
+          locale: "pl",
+          successUrl: `${window.location.origin}/pro?checkout=success`,
+          allowLogout: false,
+          variant: "one-page",
+        },
+      });
+    } catch {
+      toast.error("Nie udało się otworzyć płatności. Spróbuj ponownie.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePortal() {
+    setPortalLoading(true);
+    try {
+      const result = await openPortal({ data: { environment: getPaddleEnvironment() } });
+      if (result.url) window.open(result.url, "_blank", "noopener");
+      else toast.error("Nie znaleźliśmy aktywnej subskrypcji");
+    } catch {
+      toast.error("Nie udało się otworzyć panelu subskrypcji");
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -75,39 +123,48 @@ function ProPage() {
           {pro ? (
             <>
               <p className="text-sm font-medium text-valid">Dostęp Pro jest aktywny.</p>
-              <p className="text-sm text-muted-foreground">
-                Funkcje Pro znajdziesz w Ustawieniach — sekcja „Deadline Pro”.
-              </p>
+              {subscription?.cancel_at_period_end ? (
+                <p className="text-sm text-muted-foreground">
+                  Subskrypcja zostanie zakończona na koniec bieżącego okresu — do tego czasu
+                  korzystasz ze wszystkich funkcji.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Funkcje Pro znajdziesz w Ustawieniach — sekcja „Deadline Pro”.
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <Button asChild>
                   <Link to="/ustawienia">Przejdź do Ustawień</Link>
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setPro(false);
-                    toast.success("Dostęp Pro wyłączony");
-                  }}
-                >
-                  Wyłącz dostęp Pro
+                <Button variant="outline" onClick={handlePortal} disabled={portalLoading}>
+                  <ExternalLink className="size-4" />
+                  {portalLoading ? "Otwieram…" : "Zarządzaj subskrypcją"}
                 </Button>
               </div>
             </>
-          ) : (
+          ) : user ? (
             <>
-              <Button
-                onClick={() => {
-                  setPro(true);
-                  toast.success("Dostęp Pro włączony — funkcje są już dostępne w Ustawieniach");
-                }}
-              >
-                Włącz dostęp Pro
+              <Button onClick={handleSubscribe} disabled={loading}>
+                {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
               </Button>
               <p className="text-xs text-muted-foreground">
-                Płatności kartą jeszcze nie są podłączone — na razie włączasz dostęp ręcznie, aby
-                przetestować funkcje. Gdy powiesz „podłącz płatności”, dodam bezpieczny checkout z
-                subskrypcją {PRO_PRICE_PLN} zł/mies.
+                Płatność obsługuje Paddle (sprzedawca), więc faktura i VAT są ogarnięte
+                automatycznie. Anulujesz w każdej chwili.
+                {testMode
+                  ? " Podgląd działa w trybie testowym — użyj karty 4242 4242 4242 4242."
+                  : ""}
               </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Zaloguj się, aby wykupić dostęp Pro — subskrypcja zostanie przypisana do Twojego
+                konta.
+              </p>
+              <Button asChild>
+                <Link to="/auth">Zaloguj się</Link>
+              </Button>
             </>
           )}
         </div>
