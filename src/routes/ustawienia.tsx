@@ -444,7 +444,10 @@ function SettingsPage() {
                     if (result.sent) toast.success(`Wysłaliśmy testowy SMS na ${result.to}`);
                     else {
                       toast.error(result.reason);
-                      setSmsError({ reason: result.reason, diagnostics: result.diagnostics });
+                      setSmsError({
+                        reason: result.reason,
+                        diagnostics: result.diagnostics ?? null,
+                      });
                     }
                   } catch (e) {
                     toast.error("Nie udało się wysłać SMS-a testowego");
