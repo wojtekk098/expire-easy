@@ -19,6 +19,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DeadlineProvider } from "@/lib/deadline-store";
 import { ThemeProvider } from "@/lib/theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 
 function NotFoundComponent() {
@@ -149,6 +150,7 @@ function RootComponent() {
             <div className="flex min-h-screen w-full bg-background">
               <AppSidebar />
               <div className="flex min-w-0 flex-1 flex-col">
+                <PaymentTestModeBanner />
                 <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background/85 px-3 backdrop-blur md:px-6">
                   <SidebarTrigger />
                   <span className="text-sm font-medium text-muted-foreground">Deadline</span>

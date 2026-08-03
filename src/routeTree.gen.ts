@@ -15,6 +15,7 @@ import { Route as KalendarzRouteImport } from './routes/kalendarz'
 import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,12 @@ const UstawieniaRoute = UstawieniaRouteImport.update({
   path: '/ustawienia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByFullPath {
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +70,7 @@ export interface FileRoutesByTo {
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +80,27 @@ export interface FileRoutesById {
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/pro' | '/ustawienia'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/kalendarz'
+    | '/pozycje'
+    | '/pro'
+    | '/ustawienia'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/kalendarz' | '/pozycje' | '/pro' | '/ustawienia'
+  to:
+    | '/'
+    | '/auth'
+    | '/kalendarz'
+    | '/pozycje'
+    | '/pro'
+    | '/ustawienia'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -85,6 +109,7 @@ export interface FileRouteTypes {
     | '/pozycje'
     | '/pro'
     | '/ustawienia'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +119,7 @@ export interface RootRouteChildren {
   PozycjeRoute: typeof PozycjeRoute
   ProRoute: typeof ProRoute
   UstawieniaRoute: typeof UstawieniaRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UstawieniaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -150,17 +183,8 @@ const rootRouteChildren: RootRouteChildren = {
   PozycjeRoute: PozycjeRoute,
   ProRoute: ProRoute,
   UstawieniaRoute: UstawieniaRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

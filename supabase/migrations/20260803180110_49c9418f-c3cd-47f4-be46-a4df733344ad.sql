@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.has_active_subscription(uuid, text) FROM authenticated;
