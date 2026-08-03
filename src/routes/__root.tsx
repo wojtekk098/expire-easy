@@ -20,6 +20,8 @@ import { DeadlineProvider } from "@/lib/deadline-store";
 import { ThemeProvider } from "@/lib/theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { registerAppServiceWorker } from "@/lib/pwa";
+
 
 
 function NotFoundComponent() {
@@ -95,6 +97,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0F4C4C" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Deadline" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -105,7 +111,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -130,6 +139,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+
+  useEffect(() => {
+    registerAppServiceWorker();
+  }, []);
+
+
 
   if (pathname === "/auth") {
     return (

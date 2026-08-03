@@ -18,6 +18,7 @@ import { Route as PrywatnoscRouteImport } from './routes/prywatnosc'
 import { Route as RegulaminRouteImport } from './routes/regulamin'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as ZwrotyRouteImport } from './routes/zwroty'
+import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +66,12 @@ const ZwrotyRoute = ZwrotyRouteImport.update({
   path: '/zwroty',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OauthGoogleCalendarReturnRoute =
+  OauthGoogleCalendarReturnRouteImport.update({
+    id: '/oauth/google-calendar/return',
+    path: '/oauth/google-calendar/return',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -94,6 +102,7 @@ export interface FileRoutesByTo {
   '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -107,6 +116,7 @@ export interface FileRoutesById {
   '/regulamin': typeof RegulaminRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/regulamin'
     | '/ustawienia'
     | '/zwroty'
+    | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/regulamin'
     | '/ustawienia'
     | '/zwroty'
+    | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -145,6 +157,7 @@ export interface FileRouteTypes {
     | '/regulamin'
     | '/ustawienia'
     | '/zwroty'
+    | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -158,6 +171,7 @@ export interface RootRouteChildren {
   RegulaminRoute: typeof RegulaminRoute
   UstawieniaRoute: typeof UstawieniaRoute
   ZwrotyRoute: typeof ZwrotyRoute
+  OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -226,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZwrotyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/oauth/google-calendar/return': {
+      id: '/oauth/google-calendar/return'
+      path: '/oauth/google-calendar/return'
+      fullPath: '/oauth/google-calendar/return'
+      preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -246,6 +267,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegulaminRoute: RegulaminRoute,
   UstawieniaRoute: UstawieniaRoute,
   ZwrotyRoute: ZwrotyRoute,
+  OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
