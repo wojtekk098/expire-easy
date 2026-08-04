@@ -1,22 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  DEFAULT_CATEGORIES,
-  DEFAULT_REMINDERS,
-  toISO,
-  type Item,
-} from "./deadline-types";
+import { DEFAULT_CATEGORIES, type Item } from "./deadline-types";
 import { syncReminderItems } from "./reminders.functions";
 
 const STORAGE_KEY = "deadline.v1";
 export const REMINDER_TOKEN_KEY = "deadline.reminderToken";
 
 
-function shift(days: number): string {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + days);
-  return toISO(d);
-}
 
 type State = { items: Item[]; categories: string[] };
 
