@@ -6,7 +6,6 @@ import {
   CalendarPlus,
   FileDown,
   FileUp,
-  KeyRound,
   Mail,
   Plus,
   Smartphone,
@@ -29,7 +28,6 @@ import {
   itemsToICS,
   openPDFReport,
 } from "@/lib/data-transfer";
-import { getEmailProviderStatus, sendTestReminderEmail } from "@/lib/email.functions";
 import { getSmsProviderStatus, sendTestSms } from "@/lib/sms.functions";
 import {
   disconnectGoogleCalendar,
@@ -98,15 +96,9 @@ function SettingsPage() {
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [testing, setTesting] = useState(false);
-  const [provider, setProvider] = useState<{
-    configured: boolean;
-    from: string;
-  } | null>(null);
   const save = useServerFn(saveReminderSubscription);
   const load = useServerFn(getReminderSubscription);
-  const sendTest = useServerFn(sendTestReminderEmail);
-  const providerStatus = useServerFn(getEmailProviderStatus);
+
   const smsStatus = useServerFn(getSmsProviderStatus);
   const sendSms = useServerFn(sendTestSms);
   const gcalStatus = useServerFn(getGoogleCalendarStatus);
@@ -124,9 +116,8 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  useEffect(() => {
-    providerStatus().then(setProvider).catch(() => undefined);
-  }, [providerStatus]);
+
+
 
   useEffect(() => {
     smsStatus().then(setSms).catch(() => undefined);
@@ -311,59 +302,8 @@ function SettingsPage() {
         </ul>
       </section>
 
-      <section className="panel space-y-4 p-5">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground">
-            <KeyRound className="size-4" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold">Klucz API do wysyłki (Resend)</h2>
-            <p className="text-sm text-muted-foreground">
-              Klucz przechowujemy bezpiecznie na serwerze — nigdy nie trafia do przeglądarki.
-            </p>
-          </div>
-        </div>
 
-        <div className="rounded-lg bg-muted px-3 py-2 text-sm">
-          {provider === null ? (
-            <span className="text-muted-foreground">Sprawdzam konfigurację…</span>
-          ) : provider.configured ? (
-            <span>
-              Klucz zapisany, nadawca: <span className="font-medium">{provider.from}</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              Brak klucza — napisz w czacie „chcę wkleić klucz Resend”, a otworzę bezpieczny
-              formularz.
-            </span>
-          )}
-        </div>
 
-        <Button
-          variant="outline"
-          disabled={!user || testing || !provider?.configured}
-          onClick={async () => {
-            if (!user?.email) return;
-            setTesting(true);
-            try {
-              const result = await sendTest({ data: { email: user.email } });
-              if (result.sent) toast.success(`Wysłaliśmy testowy e-mail na ${user.email}`);
-              else toast.error(result.reason);
-            } catch {
-              toast.error("Nie udało się wysłać e-maila testowego");
-            } finally {
-              setTesting(false);
-            }
-          }}
-        >
-          {testing ? "Wysyłam…" : "Wyślij e-mail testowy"}
-        </Button>
-        {!user ? (
-          <p className="text-xs text-muted-foreground">
-            Zaloguj się, aby wysłać wiadomość testową na adres swojego konta.
-          </p>
-        ) : null}
-      </section>
 
       <section className="panel space-y-4 p-5">
         <div className="flex min-w-0 items-start gap-3">
