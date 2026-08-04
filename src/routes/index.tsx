@@ -67,7 +67,7 @@ function Dashboard() {
     <div className="mx-auto w-full max-w-5xl space-y-8">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-semibold">Cześć, Anna</h1>
+          <h1 className="truncate text-2xl font-semibold">Twoje terminy</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {counts.expired > 0
               ? `${counts.expired} ${counts.expired === 1 ? "pozycja jest przeterminowana" : "pozycje są przeterminowane"} — warto to nadrobić.`
