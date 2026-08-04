@@ -1,45 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
-const CONNECTOR_ID = "google_calendar";
-
-const GOOGLE_SCOPES = [
-  "https://www.googleapis.com/auth/userinfo.email",
-  "https://www.googleapis.com/auth/userinfo.profile",
-  "https://www.googleapis.com/auth/calendar.events",
-  "https://www.googleapis.com/auth/calendar.readonly",
-];
-
-const itemSchema = z.object({
-  id: z.string().min(1).max(80),
-  name: z.string().max(200),
-  category: z.string().max(100).optional().default(""),
-  expiry_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  notes: z.string().max(1000).optional(),
-  start_time: z.string().nullable().optional(),
-  end_time: z.string().nullable().optional(),
-});
-
-/** Zamienia id pozycji na dozwolone id wydarzenia Google (base32hex). */
-function eventId(id: string): string {
-  const hex = id.replace(/[^0-9a-f]/gi, "").toLowerCase();
-  return `deadline${hex}`.slice(0, 1000);
-}
-
-function nextDay(iso: string): string {
-  const d = new Date(`${iso}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
+import { gcalCodeSchema, gcalSyncSchema } from "./gcal.schemas";
 
 /** Czy zalogowany użytkownik podłączył swój Google Calendar. */
 export const getGoogleCalendarStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { GATEWAY_BASE_URL, CONNECTOR_ID } = await import("./gcal.server");
     const clientConfigured = Boolean(
       process.env["GOOGLE_CALENDAR_APP_USER_CONNECTOR_CLIENT_API_KEY"],
     );
@@ -72,6 +41,7 @@ export const getGoogleCalendarStatus = createServerFn({ method: "GET" })
 export const startGoogleCalendarConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { GATEWAY_BASE_URL, CONNECTOR_ID, GOOGLE_SCOPES } = await import("./gcal.server");
     const clientAPIKey = process.env["GOOGLE_CALENDAR_APP_USER_CONNECTOR_CLIENT_API_KEY"];
     if (!clientAPIKey) {
       throw new Error("Integracja Google Calendar nie jest jeszcze skonfigurowana.");
@@ -99,10 +69,10 @@ export const startGoogleCalendarConnect = createServerFn({ method: "POST" })
 /** Wymienia jednorazowy kod z powrotu OAuth na klucz połączenia i zapisuje go. */
 export const completeGoogleCalendarConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { code: string }) =>
-    z.object({ code: z.string().min(1).max(2048) }).parse(data),
-  )
+  .inputValidator((data: { code: string }) => gcalCodeSchema.parse(data))
   .handler(async ({ data, context }) => {
+    const { CONNECTOR_ID, GATEWAY_BASE_URL } = await import("./gcal.server");
+    void GATEWAY_BASE_URL;
     const { exchangeAppUserOAuthCode } = await import("@/integrations/lovable/appUserConnector");
     const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
       GATEWAY_BASE_URL,
@@ -120,6 +90,7 @@ export const completeGoogleCalendarConnect = createServerFn({ method: "POST" })
 export const disconnectGoogleCalendar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { GATEWAY_BASE_URL, CONNECTOR_ID } = await import("./gcal.server");
     const { getConnectionKeyForUser, deleteConnectionForUser } = await import(
       "./appUserConnections.server"
     );
@@ -143,10 +114,9 @@ export const disconnectGoogleCalendar = createServerFn({ method: "POST" })
 /** Zapisuje terminy jako wydarzenia w kalendarzu głównym użytkownika. */
 export const syncItemsToGoogleCalendar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { items: unknown[] }) =>
-    z.object({ items: z.array(itemSchema).max(300) }).parse(data),
-  )
+  .inputValidator((data: { items: unknown[] }) => gcalSyncSchema.parse(data))
   .handler(async ({ data, context }) => {
+    const { GATEWAY_BASE_URL, CONNECTOR_ID, eventId, nextDay } = await import("./gcal.server");
     const { getConnectionKeyForUser } = await import("./appUserConnections.server");
     const connectionAPIKey = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (!connectionAPIKey) {
