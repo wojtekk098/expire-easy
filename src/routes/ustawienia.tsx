@@ -118,9 +118,8 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  useEffect(() => {
-    providerStatus().then(setProvider).catch(() => undefined);
-  }, [providerStatus]);
+
+
 
   useEffect(() => {
     smsStatus().then(setSms).catch(() => undefined);
