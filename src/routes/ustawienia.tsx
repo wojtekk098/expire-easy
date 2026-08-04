@@ -177,14 +177,21 @@ function SettingsPage() {
           phone: phone.trim(),
           smsEnabled: smsOn,
           items,
+          origin: window.location.origin,
         },
       });
       localStorage.setItem(REMINDER_TOKEN_KEY, result.token);
-      toast.success(
-        emailOn
-          ? "Zapisano — przypomnienia będą wysyłane na ten adres"
-          : "Zapisano — przypomnienia e-mail są wyłączone",
-      );
+      if (!result.confirmed) {
+        toast.success(
+          "Zapisano — wysłaliśmy link potwierdzający na ten adres. Przypomnienia ruszą po jego kliknięciu.",
+        );
+      } else {
+        toast.success(
+          emailOn
+            ? "Zapisano — przypomnienia będą wysyłane na ten adres"
+            : "Zapisano — przypomnienia e-mail są wyłączone",
+        );
+      }
     } catch {
       toast.error("Nie udało się zapisać ustawień. Spróbuj ponownie.");
     } finally {

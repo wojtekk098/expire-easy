@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KalendarzRouteImport } from './routes/kalendarz'
+import { Route as PotwierdzPrzypomnieniaRouteImport } from './routes/potwierdz-przypomnienia'
 import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as PrywatnoscRouteImport } from './routes/prywatnosc'
@@ -34,6 +35,11 @@ const AuthRoute = AuthRouteImport.update({
 const KalendarzRoute = KalendarzRouteImport.update({
   id: '/kalendarz',
   path: '/kalendarz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PotwierdzPrzypomnieniaRoute = PotwierdzPrzypomnieniaRouteImport.update({
+  id: '/potwierdz-przypomnienia',
+  path: '/potwierdz-przypomnienia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PozycjeRoute = PozycjeRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
     | '/prywatnosc'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
     | '/prywatnosc'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
     | '/prywatnosc'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   KalendarzRoute: typeof KalendarzRoute
+  PotwierdzPrzypomnieniaRoute: typeof PotwierdzPrzypomnieniaRoute
   PozycjeRoute: typeof PozycjeRoute
   ProRoute: typeof ProRoute
   PrywatnoscRoute: typeof PrywatnoscRoute
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/kalendarz'
       fullPath: '/kalendarz'
       preLoaderRoute: typeof KalendarzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/potwierdz-przypomnienia': {
+      id: '/potwierdz-przypomnienia'
+      path: '/potwierdz-przypomnienia'
+      fullPath: '/potwierdz-przypomnienia'
+      preLoaderRoute: typeof PotwierdzPrzypomnieniaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pozycje': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   KalendarzRoute: KalendarzRoute,
+  PotwierdzPrzypomnieniaRoute: PotwierdzPrzypomnieniaRoute,
   PozycjeRoute: PozycjeRoute,
   ProRoute: ProRoute,
   PrywatnoscRoute: PrywatnoscRoute,
