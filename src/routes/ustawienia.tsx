@@ -329,8 +329,7 @@ function SettingsPage() {
             <span className="text-muted-foreground">Sprawdzam konfigurację…</span>
           ) : provider.configured ? (
             <span>
-              Klucz zapisany (<code className="font-mono text-xs">{provider.keyPreview}</code>),
-              nadawca: <span className="font-medium">{provider.from}</span>
+              Klucz zapisany, nadawca: <span className="font-medium">{provider.from}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">
