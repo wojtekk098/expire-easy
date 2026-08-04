@@ -427,14 +427,18 @@ function SettingsPage() {
                   <span className="text-muted-foreground">Sprawdzam bramkę SMS…</span>
                 ) : sms.configured ? (
                   <span>
-                    Bramka Twilio podłączona (konto{" "}
-                    <code className="font-mono text-xs">{sms.accountPreview}</code>), nadawca:{" "}
+                    Bramka Twilio podłączona, nadawca:{" "}
                     <span className="font-medium">{sms.from}</span>
                   </span>
                 ) : (
                   <span className="text-muted-foreground">
                     Bramka Twilio nie jest jeszcze gotowa — napisz w czacie „wklejam klucze Twilio”,
                     a otworzę bezpieczny formularz.
+                    {sms.missing.length > 0 ? (
+                      <span className="block mt-1 text-xs">
+                        Brakujące zmienne: {sms.missing.join(", ")}
+                      </span>
+                    ) : null}
                   </span>
                 )}
               </div>
