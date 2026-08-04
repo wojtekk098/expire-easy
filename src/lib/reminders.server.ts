@@ -67,3 +67,44 @@ export function expandRecurring(items: Item[]): Item[] {
   }
   return out.slice(0, 2000);
 }
+
+/**
+ * Double opt-in: wysyłamy link potwierdzający na podany adres.
+ * Dopóki adresat nie kliknie, subskrypcja ma confirmed_at = null i nie
+ * bierze udziału w wysyłce przypomnień.
+ */
+export async function sendConfirmationEmail(
+  email: string,
+  confirmToken: string,
+  origin: string,
+): Promise<boolean> {
+  const key = process.env["RESEND_API_KEY"];
+  if (!key) return false;
+  const from = process.env["RESEND_FROM"] ?? "Deadline <onboarding@resend.dev>";
+  const safeOrigin = /^https?:\/\/[^\s"'<>]+$/.test(origin)
+    ? origin.replace(/\/$/, "")
+    : "https://mojdeadline.pl";
+  const link = `${safeOrigin}/potwierdz-przypomnienia?token=${encodeURIComponent(confirmToken)}`;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      subject: "Potwierdź przypomnienia z Deadline",
+      html: `<div style="font-family:Arial,sans-serif;color:#1c1c1a">
+          <h2 style="color:#0F4C4C;margin:0 0 12px">Potwierdź adres e-mail</h2>
+          <p style="margin:0 0 10px">Ktoś zapisał ten adres do przypomnień o terminach w aplikacji Deadline.</p>
+          <p style="margin:0 0 16px">Jeśli to Ty, kliknij poniższy link. Bez potwierdzenia nie wyślemy żadnych przypomnień.</p>
+          <p style="margin:0 0 16px"><a href="${link}" style="color:#0F4C4C">Potwierdzam przypomnienia</a></p>
+          <p style="margin:0;color:#6b7280;font-size:12px">Jeśli to nie Ty, zignoruj tę wiadomość.</p>
+        </div>`,
+    }),
+  });
+  if (!response.ok) {
+    console.error(`Resend confirmation failed [${response.status}]`);
+    return false;
+  }
+  return true;
+}
