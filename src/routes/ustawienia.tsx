@@ -83,8 +83,8 @@ function SettingsPage() {
   const [smsTrialInfo, setSmsTrialInfo] = useState<string | null>(null);
   const [sms, setSms] = useState<{
     configured: boolean;
-    accountPreview: string | null;
     from: string | null;
+    missing: string[];
   } | null>(null);
   const [gcal, setGcal] = useState<{
     clientConfigured: boolean;
