@@ -11,7 +11,7 @@ import { loadEnv } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Server routes (e.g. e-mail) need non-VITE_ env vars in process.env.
-const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
+const serverEnv = loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd(), "");
 Object.assign(process.env, serverEnv);
 
 export default defineConfig({

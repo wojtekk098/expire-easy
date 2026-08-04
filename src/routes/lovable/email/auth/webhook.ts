@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "expire-easy"
+const SITE_NAME = "Deadline"
 const SENDER_DOMAIN = "notify.mojdeadline.pl"
 const ROOT_DOMAIN = "mojdeadline.pl"
 const FROM_DOMAIN = "notify.mojdeadline.pl"
