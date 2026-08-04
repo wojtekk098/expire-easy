@@ -6,7 +6,6 @@ import {
   CalendarPlus,
   FileDown,
   FileUp,
-  KeyRound,
   Mail,
   Plus,
   Smartphone,
@@ -29,7 +28,6 @@ import {
   itemsToICS,
   openPDFReport,
 } from "@/lib/data-transfer";
-import { getEmailProviderStatus, sendTestReminderEmail } from "@/lib/email.functions";
 import { getSmsProviderStatus, sendTestSms } from "@/lib/sms.functions";
 import {
   disconnectGoogleCalendar,
