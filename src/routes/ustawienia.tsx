@@ -33,7 +33,7 @@ import {
   disconnectGoogleCalendar,
   getGoogleCalendarStatus,
   startGoogleCalendarConnect,
-  syncItemsToGoogleCalendar,
+  importGoogleCalendarEvents,
 } from "@/lib/gcal.functions";
 import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/connector-popup";
 import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
