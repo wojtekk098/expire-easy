@@ -106,7 +106,7 @@ function Dashboard() {
       <section className="space-y-3">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="text-lg font-semibold">Najpilniejsze</h2>
-          <Link to="/pozycje" className="text-sm text-primary hover:underline">
+          <Link to="/pozycje" search={{ status: "all" }} className="text-sm text-primary hover:underline">
             Zobacz wszystkie
           </Link>
         </div>
