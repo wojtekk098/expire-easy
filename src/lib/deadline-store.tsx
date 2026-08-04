@@ -18,56 +18,6 @@ function shift(days: number): string {
   return toISO(d);
 }
 
-function seedItems(): Item[] {
-  return [
-    {
-      id: "1",
-      name: "Polisa OC firmy",
-      category: "Ubezpieczenia",
-      expiry_date: shift(-4),
-      notes: "PZU, numer polisy 88213/2025",
-      reminder_days_before: DEFAULT_REMINDERS,
-    },
-    {
-      id: "2",
-      name: "Certyfikat BHP",
-      category: "Certyfikaty",
-      expiry_date: shift(5),
-      reminder_days_before: [14, 7, 1],
-    },
-    {
-      id: "3",
-      name: "Domena mojafirma.pl",
-      category: "Domeny/Hosting",
-      expiry_date: shift(18),
-      notes: "Odnowienie u OVH, ok. 90 zł",
-      reminder_days_before: DEFAULT_REMINDERS,
-    },
-    {
-      id: "4",
-      name: "Licencja Adobe Creative Cloud",
-      category: "Licencje oprogramowania",
-      expiry_date: shift(27),
-      reminder_days_before: [30, 7],
-    },
-    {
-      id: "5",
-      name: "Przegląd techniczny auta firmowego",
-      category: "Przeglądy techniczne",
-      expiry_date: shift(74),
-      notes: "Ford Transit, WX 4821K",
-      reminder_days_before: DEFAULT_REMINDERS,
-    },
-    {
-      id: "6",
-      name: "Umowa najmu biura",
-      category: "Umowy",
-      expiry_date: shift(140),
-      reminder_days_before: [30, 14],
-    },
-  ];
-}
-
 type State = { items: Item[]; categories: string[] };
 
 type Store = State & {
@@ -95,10 +45,10 @@ export function DeadlineProvider({ children }: { children: ReactNode }) {
           categories: parsed.categories?.length ? parsed.categories : DEFAULT_CATEGORIES,
         });
       } else {
-        setState({ items: seedItems(), categories: DEFAULT_CATEGORIES });
+        setState({ items: [], categories: DEFAULT_CATEGORIES });
       }
     } catch {
-      setState({ items: seedItems(), categories: DEFAULT_CATEGORIES });
+      setState({ items: [], categories: DEFAULT_CATEGORIES });
     }
     setReady(true);
   }, []);
