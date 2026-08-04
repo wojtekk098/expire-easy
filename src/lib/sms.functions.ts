@@ -12,7 +12,7 @@ export function toE164(input: string): string | null {
   return null;
 }
 
-/** Czy bramka SMS (Twilio) jest skonfigurowana na serwerze. */
+/** Czy bramka SMS (Twilio) jest skonfigurowana na serwerze. Nie zwraca podglądu kluczy. */
 export const getSmsProviderStatus = createServerFn({ method: "GET" }).handler(async () => {
   const accountSid = process.env["TWILIO_ACCOUNT_SID"] ?? "";
   const keySid = process.env["TWILIO_API_KEY_SID"] ?? "";
@@ -20,7 +20,6 @@ export const getSmsProviderStatus = createServerFn({ method: "GET" }).handler(as
   const from = process.env["TWILIO_FROM"] ?? "";
   return {
     configured: Boolean(accountSid && keySid && keySecret && from),
-    accountPreview: accountSid ? `${accountSid.slice(0, 6)}…${accountSid.slice(-4)}` : null,
     from: from || null,
     missing: [
       accountSid ? null : "TWILIO_ACCOUNT_SID",

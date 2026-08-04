@@ -83,8 +83,8 @@ function SettingsPage() {
   const [smsTrialInfo, setSmsTrialInfo] = useState<string | null>(null);
   const [sms, setSms] = useState<{
     configured: boolean;
-    accountPreview: string | null;
     from: string | null;
+    missing: string[];
   } | null>(null);
   const [gcal, setGcal] = useState<{
     clientConfigured: boolean;
@@ -101,7 +101,6 @@ function SettingsPage() {
   const [testing, setTesting] = useState(false);
   const [provider, setProvider] = useState<{
     configured: boolean;
-    keyPreview: string | null;
     from: string;
   } | null>(null);
   const save = useServerFn(saveReminderSubscription);
@@ -330,8 +329,7 @@ function SettingsPage() {
             <span className="text-muted-foreground">Sprawdzam konfigurację…</span>
           ) : provider.configured ? (
             <span>
-              Klucz zapisany (<code className="font-mono text-xs">{provider.keyPreview}</code>),
-              nadawca: <span className="font-medium">{provider.from}</span>
+              Klucz zapisany, nadawca: <span className="font-medium">{provider.from}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">
@@ -429,14 +427,18 @@ function SettingsPage() {
                   <span className="text-muted-foreground">Sprawdzam bramkę SMS…</span>
                 ) : sms.configured ? (
                   <span>
-                    Bramka Twilio podłączona (konto{" "}
-                    <code className="font-mono text-xs">{sms.accountPreview}</code>), nadawca:{" "}
+                    Bramka Twilio podłączona, nadawca:{" "}
                     <span className="font-medium">{sms.from}</span>
                   </span>
                 ) : (
                   <span className="text-muted-foreground">
                     Bramka Twilio nie jest jeszcze gotowa — napisz w czacie „wklejam klucze Twilio”,
                     a otworzę bezpieczny formularz.
+                    {sms.missing.length > 0 ? (
+                      <span className="block mt-1 text-xs">
+                        Brakujące zmienne: {sms.missing.join(", ")}
+                      </span>
+                    ) : null}
                   </span>
                 )}
               </div>
