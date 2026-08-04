@@ -101,7 +101,6 @@ function SettingsPage() {
   const [testing, setTesting] = useState(false);
   const [provider, setProvider] = useState<{
     configured: boolean;
-    keyPreview: string | null;
     from: string;
   } | null>(null);
   const save = useServerFn(saveReminderSubscription);
