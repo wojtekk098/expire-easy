@@ -511,7 +511,7 @@ function SettingsPage() {
                                 name: event.name,
                                 category: "Inne",
                                 expiry_date: event.expiry_date,
-                                notes: event.notes ?? undefined,
+                                notes: event.notes ?? "",
                                 reminder_days_before: [7, 1],
                                 start_time: event.start_time,
                                 end_time: event.end_time,
