@@ -3,13 +3,12 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-/** Czy klucz API do wysyłki e-maili jest zapisany na serwerze. */
+/** Czy klucz API do wysyłki e-maili jest zapisany na serwerze. Nie zwraca podglądu klucza. */
 export const getEmailProviderStatus = createServerFn({ method: "GET" }).handler(async () => {
   const key = process.env["RESEND_API_KEY"] ?? "";
   const from = process.env["RESEND_FROM"] ?? "";
   return {
     configured: key.length > 0,
-    keyPreview: key ? `${key.slice(0, 6)}…${key.slice(-4)}` : null,
     from: from || "Deadline <onboarding@resend.dev>",
   };
 });
