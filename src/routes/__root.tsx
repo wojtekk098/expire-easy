@@ -136,17 +136,26 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const PUBLIC_PATHS = ["/auth", "/regulamin", "/prywatnosc", "/zwroty", "/oauth"];
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
+  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   useEffect(() => {
     registerAppServiceWorker();
   }, []);
 
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !isPublic) {
+      navigate({ to: "/auth", replace: true });
+    }
+  }, [loading, isAuthenticated, isPublic, navigate]);
 
-
-  if (pathname === "/auth") {
+  if (isPublic) {
     return (
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
@@ -156,6 +165,16 @@ function RootComponent() {
       </QueryClientProvider>
     );
   }
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <p className="text-sm text-muted-foreground">Wczytywanie…</p>
+      </div>
+    );
+  }
+
+
 
   return (
     <QueryClientProvider client={queryClient}>
