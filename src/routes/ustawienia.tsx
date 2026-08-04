@@ -98,15 +98,9 @@ function SettingsPage() {
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [testing, setTesting] = useState(false);
-  const [provider, setProvider] = useState<{
-    configured: boolean;
-    from: string;
-  } | null>(null);
   const save = useServerFn(saveReminderSubscription);
   const load = useServerFn(getReminderSubscription);
-  const sendTest = useServerFn(sendTestReminderEmail);
-  const providerStatus = useServerFn(getEmailProviderStatus);
+
   const smsStatus = useServerFn(getSmsProviderStatus);
   const sendSms = useServerFn(sendTestSms);
   const gcalStatus = useServerFn(getGoogleCalendarStatus);
