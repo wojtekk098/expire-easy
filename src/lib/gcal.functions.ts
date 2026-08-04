@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gcalCodeSchema, gcalSyncSchema } from "./gcal.schemas";
+import { gcalCodeSchema, type GoogleCalendarEvent } from "./gcal.schemas";
 
 /** Czy zalogowany użytkownik podłączył swój Google Calendar. */
 export const getGoogleCalendarStatus = createServerFn({ method: "GET" })
