@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
   useRouter,
   useRouterState,
+  useNavigate,
 
   HeadContent,
   Scripts,
@@ -21,6 +22,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { registerAppServiceWorker } from "@/lib/pwa";
+import { useAuth } from "@/hooks/useAuth";
 
 
 
