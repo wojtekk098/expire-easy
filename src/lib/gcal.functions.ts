@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gcalCodeSchema, gcalSyncSchema } from "./gcal.schemas";
+import { gcalCodeSchema, type GoogleCalendarEvent } from "./gcal.schemas";
 
 /** Czy zalogowany użytkownik podłączył swój Google Calendar. */
 export const getGoogleCalendarStatus = createServerFn({ method: "GET" })
@@ -111,84 +111,79 @@ export const disconnectGoogleCalendar = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-/** Zapisuje terminy jako wydarzenia w kalendarzu głównym użytkownika. */
-export const syncItemsToGoogleCalendar = createServerFn({ method: "POST" })
+/** Pobiera wydarzenia z kalendarza głównego użytkownika (do 12 miesięcy w przód). */
+export const importGoogleCalendarEvents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { items: unknown[] }) => gcalSyncSchema.parse(data))
-  .handler(async ({ data, context }) => {
-    const { GATEWAY_BASE_URL, CONNECTOR_ID, eventId, nextDay } = await import("./gcal.server");
+  .handler(async ({ context }) => {
+    const { GATEWAY_BASE_URL, CONNECTOR_ID } = await import("./gcal.server");
     const { getConnectionKeyForUser } = await import("./appUserConnections.server");
     const connectionAPIKey = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (!connectionAPIKey) {
-      return { synced: 0, failed: 0, reason: "Kalendarz nie jest podłączony." as string | null };
-    }
-    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
-
-    let synced = 0;
-    let failed = 0;
-
-    for (const item of data.items) {
-      const id = eventId(item.id);
-      const timed = Boolean(item.start_time);
-      const start = timed
-        ? { dateTime: `${item.expiry_date}T${item.start_time!.slice(0, 5)}:00`, timeZone: "Europe/Warsaw" }
-        : { date: item.expiry_date };
-      const end = timed
-        ? {
-            dateTime: `${item.expiry_date}T${(item.end_time ?? item.start_time!).slice(0, 5)}:00`,
-            timeZone: "Europe/Warsaw",
-          }
-        : { date: nextDay(item.expiry_date) };
-
-      const body = {
-        id,
-        summary: `Deadline: ${item.name}`,
-        description: [item.category, item.notes].filter(Boolean).join("\n"),
-        start,
-        end,
-        reminders: { useDefault: true },
+      return {
+        events: [] as GoogleCalendarEvent[],
+        reason: "Kalendarz nie jest podłączony." as string | null,
       };
-
-      // PUT tworzy wydarzenie o znanym id albo aktualizuje istniejące — bez duplikatów.
-      const res = await callAsAppUser({
-        gatewayBaseUrl: GATEWAY_BASE_URL,
-        connectionAPIKey,
-        connectorId: CONNECTOR_ID,
-        path: `/calendar/v3/calendars/primary/events/${id}`,
-        init: {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        },
-      });
-
-      if (res.ok) {
-        synced += 1;
-        continue;
-      }
-
-      if (res.status === 404) {
-        const insert = await callAsAppUser({
-          gatewayBaseUrl: GATEWAY_BASE_URL,
-          connectionAPIKey,
-          connectorId: CONNECTOR_ID,
-          path: "/calendar/v3/calendars/primary/events",
-          init: {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          },
-        });
-        if (insert.ok) {
-          synced += 1;
-          continue;
-        }
-        console.error(`Google Calendar insert failed [${insert.status}]: ${await insert.text()}`);
-      } else {
-        console.error(`Google Calendar update failed [${res.status}]: ${await res.text()}`);
-      }
-      failed += 1;
     }
 
-    return { synced, failed, reason: null as string | null };
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const now = new Date();
+    const timeMax = new Date(now);
+    timeMax.setFullYear(timeMax.getFullYear() + 1);
+
+    const params = new URLSearchParams({
+      timeMin: now.toISOString(),
+      timeMax: timeMax.toISOString(),
+      singleEvents: "true",
+      orderBy: "startTime",
+      maxResults: "250",
+    });
+
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey,
+      connectorId: CONNECTOR_ID,
+      path: `/calendar/v3/calendars/primary/events?${params.toString()}`,
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Google Calendar import failed [${res.status}]: ${body}`);
+      return {
+        events: [] as GoogleCalendarEvent[],
+        reason: "Nie udało się odczytać wydarzeń z kalendarza." as string | null,
+      };
+    }
+
+    const payload = (await res.json()) as {
+      items?: {
+        id?: string;
+        summary?: string;
+        description?: string;
+        location?: string;
+        start?: { date?: string; dateTime?: string };
+        end?: { date?: string; dateTime?: string };
+        status?: string;
+      }[];
+    };
+
+    const events: GoogleCalendarEvent[] = [];
+    for (const event of payload.items ?? []) {
+      if (event.status === "cancelled") continue;
+      const startRaw = event.start?.date ?? event.start?.dateTime;
+      if (!startRaw) continue;
+      const expiry_date = startRaw.slice(0, 10);
+      const start_time = event.start?.dateTime ? event.start.dateTime.slice(11, 16) : null;
+      const end_time = event.end?.dateTime ? event.end.dateTime.slice(11, 16) : null;
+      events.push({
+        source_id: event.id ?? `${expiry_date}-${event.summary ?? ""}`,
+        name: (event.summary ?? "Wydarzenie z kalendarza").slice(0, 200),
+        expiry_date,
+        start_time,
+        end_time,
+        notes: [event.description, event.location].filter(Boolean).join("\n").slice(0, 1000) || null,
+      });
+    }
+
+    return { events, reason: null as string | null };
   });
+

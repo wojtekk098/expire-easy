@@ -33,7 +33,7 @@ import {
   disconnectGoogleCalendar,
   getGoogleCalendarStatus,
   startGoogleCalendarConnect,
-  syncItemsToGoogleCalendar,
+  importGoogleCalendarEvents,
 } from "@/lib/gcal.functions";
 import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/connector-popup";
 import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
@@ -103,7 +103,7 @@ function SettingsPage() {
   const sendSms = useServerFn(sendTestSms);
   const gcalStatus = useServerFn(getGoogleCalendarStatus);
   const startGcal = useServerFn(startGoogleCalendarConnect);
-  const syncGcal = useServerFn(syncItemsToGoogleCalendar);
+  const importGcal = useServerFn(importGoogleCalendarEvents);
   const disconnectGcal = useServerFn(disconnectGoogleCalendar);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -476,7 +476,7 @@ function SettingsPage() {
                   <p className="text-xs text-muted-foreground">
                     {gcal?.connected
                       ? `Podłączony kalendarz: ${gcal.email ?? "kalendarz główny"}`
-                      : "Podłącz swoje konto Google i wysyłaj terminy prosto do kalendarza."}
+                      : "Podłącz swoje konto Google i importuj wydarzenia z kalendarza jako terminy."}
                   </p>
                 </div>
               </div>
@@ -494,23 +494,45 @@ function SettingsPage() {
                         onClick={async () => {
                           setGcalBusy(true);
                           try {
-                            const result = await syncGcal({ data: { items: items.slice(0, 300) } });
-                            if (result.reason) toast.error(result.reason);
-                            else
-                              toast.success(
-                                `Zapisano ${result.synced} terminów w Google Calendar${
-                                  result.failed ? `, nie udało się ${result.failed}` : ""
-                                }`,
-                              );
+                            const result = await importGcal();
+                            if (result.reason) {
+                              toast.error(result.reason);
+                              return;
+                            }
+                            const known = new Set(
+                              items.map((i) => `${i.expiry_date}|${i.name.toLowerCase()}`),
+                            );
+                            let added = 0;
+                            for (const event of result.events) {
+                              const key = `${event.expiry_date}|${event.name.toLowerCase()}`;
+                              if (known.has(key)) continue;
+                              known.add(key);
+                              addItem({
+                                name: event.name,
+                                category: "Inne",
+                                expiry_date: event.expiry_date,
+                                notes: event.notes ?? "",
+                                reminder_days_before: [7, 1],
+                                start_time: event.start_time,
+                                end_time: event.end_time,
+                              });
+                              added += 1;
+                            }
+                            toast.success(
+                              added
+                                ? `Zaimportowano ${added} terminów z Google Calendar`
+                                : "Brak nowych wydarzeń do zaimportowania",
+                            );
                           } catch {
-                            toast.error("Nie udało się zsynchronizować kalendarza");
+                            toast.error("Nie udało się zaimportować kalendarza");
                           } finally {
                             setGcalBusy(false);
                           }
                         }}
                       >
-                        {gcalBusy ? "Synchronizuję…" : "Wyślij terminy do kalendarza"}
+                        {gcalBusy ? "Importuję…" : "Importuj terminy z kalendarza"}
                       </Button>
+
                       <Button
                         variant="outline"
                         disabled={gcalBusy}
