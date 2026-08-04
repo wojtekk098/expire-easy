@@ -103,7 +103,7 @@ function SettingsPage() {
   const sendSms = useServerFn(sendTestSms);
   const gcalStatus = useServerFn(getGoogleCalendarStatus);
   const startGcal = useServerFn(startGoogleCalendarConnect);
-  const syncGcal = useServerFn(syncItemsToGoogleCalendar);
+  const importGcal = useServerFn(importGoogleCalendarEvents);
   const disconnectGcal = useServerFn(disconnectGoogleCalendar);
   const { user } = useAuth();
   const navigate = useNavigate();
