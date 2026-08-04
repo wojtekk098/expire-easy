@@ -24,7 +24,7 @@ const handler = createAuthEmailHandler({
   sendUrl: process.env['LOVABLE_SEND_URL'],
   emails: {
     signup: {
-      subject: 'Confirm your email',
+      subject: 'Potwierdź adres e-mail',
       render: (data) =>
         React.createElement(SignupEmail, {
           siteName: SITE_NAME,
@@ -34,7 +34,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     invite: {
-      subject: "You've been invited",
+      subject: 'Zaproszenie do Deadline',
       render: (data) =>
         React.createElement(InviteEmail, {
           siteName: SITE_NAME,
@@ -43,7 +43,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     magiclink: {
-      subject: 'Your login link',
+      subject: 'Twój link do logowania',
       render: (data) =>
         React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
@@ -51,7 +51,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     recovery: {
-      subject: 'Reset your password',
+      subject: 'Zresetuj hasło',
       render: (data) =>
         React.createElement(RecoveryEmail, {
           siteName: SITE_NAME,
@@ -59,7 +59,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     email_change: {
-      subject: 'Confirm your new email',
+      subject: 'Potwierdź nowy adres e-mail',
       render: (data) =>
         React.createElement(EmailChangeEmail, {
           siteName: SITE_NAME,
@@ -70,7 +70,7 @@ const handler = createAuthEmailHandler({
         }),
     },
     reauthentication: {
-      subject: 'Your verification code',
+      subject: 'Twój kod weryfikacyjny',
       render: (data) =>
         React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
     },
