@@ -535,6 +535,36 @@ function SettingsPage() {
 
                       <Button
                         variant="outline"
+                        disabled={gcalBusy || !user}
+                        onClick={async () => {
+                          const popup = openConnectorPopup();
+                          if (!popup) {
+                            toast.error("Przeglądarka zablokowała okno — zezwól na wyskakujące okna");
+                            return;
+                          }
+                          setGcalBusy(true);
+                          try {
+                            await disconnectGcal();
+                            const { authorizationUrl } = await startGcal();
+                            const done = waitForOAuthCompletion(popup, "google_calendar");
+                            popup.location.href = authorizationUrl;
+                            await done;
+                            setGcal(await gcalStatus());
+                            toast.success("Konto Google zmienione");
+                          } catch {
+                            popup.close();
+                            setGcal(await gcalStatus().catch(() => gcal));
+                            toast.error("Nie udało się zmienić konta Google");
+                          } finally {
+                            setGcalBusy(false);
+                          }
+                        }}
+                      >
+                        Zmień konto Google
+                      </Button>
+
+                      <Button
+                        variant="outline"
                         disabled={gcalBusy}
                         onClick={async () => {
                           setGcalBusy(true);
@@ -551,6 +581,7 @@ function SettingsPage() {
                       >
                         Odłącz
                       </Button>
+
                     </>
                   ) : (
                     <Button
