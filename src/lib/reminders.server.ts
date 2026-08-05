@@ -108,3 +108,168 @@ export async function sendConfirmationEmail(
   }
   return true;
 }
+
+/** Dzisiejsza data w strefie subskrypcji (YYYY-MM-DD). */
+export function todayIn(timezone: string): string {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone || "Europe/Warsaw",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return fmt.format(new Date());
+}
+
+/** Różnica dni między datą terminu i „dziś” (obie jako YYYY-MM-DD). */
+export function daysBetweenISO(fromISO: string, toISODate: string): number {
+  const a = Date.parse(`${fromISO}T00:00:00Z`);
+  const b = Date.parse(`${toISODate}T00:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return Number.NaN;
+  return Math.round((b - a) / 86_400_000);
+}
+
+function dateLabel(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+export function reminderSubject(item: Item, days: number): string {
+  if (days === 0) return `${item.name} — termin wygasa dziś`;
+  if (days === 1) return `${item.name} — termin wygasa jutro`;
+  return `${item.name} — termin wygasa za ${days} dni`;
+}
+
+/** Wysyła e-mail z przypomnieniem o jednym terminie. */
+export async function sendReminderEmail(
+  email: string,
+  item: Item,
+  days: number,
+): Promise<boolean> {
+  const key = process.env["RESEND_API_KEY"];
+  if (!key) return false;
+  const from = process.env["RESEND_FROM"] ?? "Deadline <onboarding@resend.dev>";
+  const subject = reminderSubject(item, days);
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      subject,
+      html: `<div style="font-family:Arial,sans-serif;color:#1c1c1a">
+          <h2 style="color:#0F4C4C;margin:0 0 12px">${subject}</h2>
+          <p style="margin:0 0 8px"><strong>Kategoria:</strong> ${item.category || "Inne"}</p>
+          <p style="margin:0 0 8px"><strong>Data:</strong> ${dateLabel(item.expiry_date)}</p>
+          ${item.notes ? `<p style="margin:0 0 8px"><strong>Notatki:</strong> ${item.notes}</p>` : ""}
+          <p style="margin:16px 0 0;color:#6b7280;font-size:12px">Wiadomość z aplikacji Deadline (mojdeadline.pl).</p>
+        </div>`,
+    }),
+  });
+  if (!response.ok) {
+    console.error(`Resend reminder failed [${response.status}]: ${await response.text()}`);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Wysyła SMS z przypomnieniem. Na koncie trial Twilio (błąd 572006) wysyłamy
+ * predefiniowany szablon zamiast własnej treści.
+ */
+export async function sendReminderSms(phone: string, body: string): Promise<boolean> {
+  const accountSid = process.env["TWILIO_ACCOUNT_SID"];
+  const keySid = process.env["TWILIO_API_KEY_SID"];
+  const keySecret = process.env["TWILIO_API_KEY_SECRET"];
+  const from = process.env["TWILIO_FROM"];
+  if (!accountSid || !keySid || !keySecret || !from) return false;
+
+  const { toE164 } = await import("./sms.functions");
+  const to = toE164(phone);
+  if (!to) return false;
+
+  const post = async (text: string) =>
+    fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${btoa(`${keySid}:${keySecret}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: text }),
+    });
+
+  let response = await post(body);
+  if (!response.ok) {
+    const raw = await response.text();
+    let code: number | null = null;
+    try {
+      code = (JSON.parse(raw) as { code?: number }).code ?? null;
+    } catch {
+      code = null;
+    }
+    console.error(`Twilio reminder failed [${response.status}]: ${raw}`);
+    if (code !== 572006) return false;
+    response = await post("sms_appointment_reminders");
+    if (!response.ok) {
+      console.error(`Twilio template reminder failed [${response.status}]`);
+      return false;
+    }
+  }
+  return true;
+}
+
+export type DispatchResult = {
+  subscriptions: number;
+  emails: number;
+  sms: number;
+  skipped: number;
+};
+
+/** Codzienna wysyłka: dla każdej potwierdzonej subskrypcji sprawdza terminy. */
+export async function dispatchReminders(): Promise<DispatchResult> {
+  const supabase = await admin();
+  const { data: subs, error } = await supabase
+    .from("reminder_subscriptions")
+    .select("id, email, enabled, confirmed_at, timezone, items, phone, sms_enabled")
+    .eq("enabled", true)
+    .not("confirmed_at", "is", null);
+  if (error) throw new Error(error.message);
+
+  const result: DispatchResult = { subscriptions: 0, emails: 0, sms: 0, skipped: 0 };
+
+  for (const sub of subs ?? []) {
+    result.subscriptions += 1;
+    const today = todayIn((sub.timezone as string) ?? "Europe/Warsaw");
+    const items = Array.isArray(sub.items) ? (sub.items as unknown as Item[]) : [];
+
+    for (const item of items) {
+      if (!item?.expiry_date) continue;
+      const days = daysBetweenISO(today, item.expiry_date);
+      if (!Number.isFinite(days) || days < 0) continue;
+      const wanted = Array.isArray(item.reminder_days_before) ? item.reminder_days_before : [];
+      if (!wanted.includes(days)) continue;
+
+      // Idempotencja: jedna wysyłka na termin/próg/dzień.
+      const { error: claimError } = await supabase.from("reminder_sends").insert({
+        subscription_id: sub.id as string,
+        item_id: String(item.id),
+        days_before: days,
+        sent_on: today,
+      });
+      if (claimError) {
+        result.skipped += 1;
+        continue;
+      }
+
+      if (await sendReminderEmail(sub.email as string, item, days)) result.emails += 1;
+      if (sub.sms_enabled && sub.phone) {
+        const ok = await sendReminderSms(
+          sub.phone as string,
+          `${reminderSubject(item, days)} (${dateLabel(item.expiry_date)}). Deadline`,
+        );
+        if (ok) result.sms += 1;
+      }
+    }
+  }
+
+  return result;
+}
