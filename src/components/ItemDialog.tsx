@@ -83,6 +83,8 @@ export function ItemDialog({
     setContactPhone(item?.contact_phone ?? "");
     setIsRecurring(Boolean(item?.is_recurring));
     setRecurrence((item?.recurrence_rule as RecurrenceRule) ?? "monthly");
+    setNotifyEmail(item ? item.notify_email !== false : true);
+    setNotifySms(item ? item.notify_sms === true : false);
   }, [open, item, defaultDate, categories]);
 
 
