@@ -40,6 +40,8 @@ export function normalizeItems(items: unknown): Item[] {
         contact_phone: i.contact_phone ? String(i.contact_phone).slice(0, 40) : null,
         is_recurring: Boolean(i.is_recurring),
         recurrence_rule: i.recurrence_rule ? String(i.recurrence_rule).slice(0, 100) : null,
+        notify_email: i.notify_email !== false,
+        notify_sms: i.notify_sms === true,
       } as Item;
     });
 
