@@ -55,6 +55,8 @@ export type Database = {
           is_recurring: boolean
           name: string
           notes: string | null
+          notify_email: boolean
+          notify_sms: boolean
           recurrence_rule: string | null
           reminder_days_before: number[]
           start_time: string | null
@@ -75,6 +77,8 @@ export type Database = {
           is_recurring?: boolean
           name: string
           notes?: string | null
+          notify_email?: boolean
+          notify_sms?: boolean
           recurrence_rule?: string | null
           reminder_days_before?: number[]
           start_time?: string | null
@@ -95,6 +99,8 @@ export type Database = {
           is_recurring?: boolean
           name?: string
           notes?: string | null
+          notify_email?: boolean
+          notify_sms?: boolean
           recurrence_rule?: string | null
           reminder_days_before?: number[]
           start_time?: string | null
