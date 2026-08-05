@@ -26,6 +26,8 @@ const basePayload = {
   recurrence_rule: z.string().max(100).nullable().optional(),
   start_time: timeSchema.optional(),
   end_time: timeSchema.optional(),
+  notify_email: z.boolean().optional(),
+  notify_sms: z.boolean().optional(),
 };
 
 const createSchema = z.object(basePayload);
@@ -39,7 +41,7 @@ function compact<T extends Record<string, unknown>>(obj: T): Record<string, unkn
 }
 
 const SELECT =
-  "id, name, category, expiry_date, notes, reminder_days_before, contact_name, contact_email, contact_phone, status, color_tag, is_recurring, recurrence_rule, start_time, end_time, created_at, updated_at";
+  "id, name, category, expiry_date, notes, reminder_days_before, contact_name, contact_email, contact_phone, status, color_tag, is_recurring, recurrence_rule, start_time, end_time, notify_email, notify_sms, created_at, updated_at";
 
 export const listDeadlines = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

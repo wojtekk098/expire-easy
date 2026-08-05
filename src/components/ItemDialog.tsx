@@ -64,6 +64,8 @@ export function ItemDialog({
   const [contactPhone, setContactPhone] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrence, setRecurrence] = useState<RecurrenceRule>("monthly");
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifySms, setNotifySms] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -81,6 +83,8 @@ export function ItemDialog({
     setContactPhone(item?.contact_phone ?? "");
     setIsRecurring(Boolean(item?.is_recurring));
     setRecurrence((item?.recurrence_rule as RecurrenceRule) ?? "monthly");
+    setNotifyEmail(item ? item.notify_email !== false : true);
+    setNotifySms(item ? item.notify_sms === true : false);
   }, [open, item, defaultDate, categories]);
 
 
@@ -122,6 +126,8 @@ export function ItemDialog({
       contact_phone: contactPhone.trim() || null,
       is_recurring: isRecurring,
       recurrence_rule: isRecurring ? recurrence : null,
+      notify_email: notifyEmail,
+      notify_sms: notifySms,
     };
 
     delete (payload as { id?: string }).id;
@@ -378,10 +384,36 @@ export function ItemDialog({
                 );
               })}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Powiadomienia e-mail włączymy w Ustawieniach.
-            </p>
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              <Label className="text-xs font-normal text-muted-foreground">
+                Kanały przypomnień dla tego terminu
+              </Label>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="item-notify-email"
+                  checked={notifyEmail}
+                  onCheckedChange={(v) => setNotifyEmail(v === true)}
+                />
+                <Label htmlFor="item-notify-email" className="font-normal">
+                  Przypomnienie e-mailem
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="item-notify-sms"
+                  checked={notifySms}
+                  onCheckedChange={(v) => setNotifySms(v === true)}
+                />
+                <Label htmlFor="item-notify-sms" className="font-normal">
+                  Przypomnienie SMS-em
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Adres e-mail i numer telefonu ustawisz raz w Ustawieniach.
+              </p>
+            </div>
           </div>
+
         </div>
 
         <DialogFooter>

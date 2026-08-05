@@ -40,6 +40,8 @@ export function normalizeItems(items: unknown): Item[] {
         contact_phone: i.contact_phone ? String(i.contact_phone).slice(0, 40) : null,
         is_recurring: Boolean(i.is_recurring),
         recurrence_rule: i.recurrence_rule ? String(i.recurrence_rule).slice(0, 100) : null,
+        notify_email: i.notify_email !== false,
+        notify_sms: i.notify_sms === true,
       } as Item;
     });
 
@@ -268,8 +270,10 @@ export async function dispatchReminders(): Promise<DispatchResult> {
         continue;
       }
 
-      if (await sendReminderEmail(sub.email as string, item, days)) result.emails += 1;
-      if (sub.sms_enabled && sub.phone) {
+      if (item.notify_email !== false) {
+        if (await sendReminderEmail(sub.email as string, item, days)) result.emails += 1;
+      }
+      if (item.notify_sms === true && sub.sms_enabled && sub.phone) {
         const ok = await sendReminderSms(
           sub.phone as string,
           `${reminderSubject(item, days)} (${dateLabel(item.expiry_date)}). Deadline`,
