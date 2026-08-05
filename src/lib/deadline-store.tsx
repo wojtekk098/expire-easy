@@ -1,27 +1,18 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DEFAULT_CATEGORIES, type Item } from "./deadline-types";
 import { syncReminderItems } from "./reminders.functions";
+import {
+  StoreContext,
+  type DeadlineState as State,
+  type DeadlineStore as Store,
+} from "./deadline-context";
 
 const STORAGE_KEY = "deadline.v1";
 export const REMINDER_TOKEN_KEY = "deadline.reminderToken";
 
-
-
-type State = { items: Item[]; categories: string[] };
-
-type Store = State & {
-  ready: boolean;
-  addItem: (data: Omit<Item, "id">) => void;
-  updateItem: (id: string, data: Omit<Item, "id">) => void;
-  deleteItem: (id: string) => void;
-  addCategory: (name: string) => void;
-  deleteCategory: (name: string) => void;
-};
-
-const StoreContext = createContext<Store | null>(null);
-
 export function DeadlineProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>({ items: [], categories: DEFAULT_CATEGORIES });
+
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
