@@ -271,7 +271,20 @@ function CalendarPage() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{formatPL(selected)}</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">{formatPL(selected)}</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditing(null);
+              setDialogOpen(true);
+            }}
+          >
+            <Plus className="size-4" />
+            Dodaj termin na ten dzień
+          </Button>
+        </div>
         {selectedItems.length === 0 ? (
           <div className="panel flex flex-col items-center gap-3 px-6 py-10 text-center">
             <p className="font-medium">Tego dnia nic nie wygasa</p>
