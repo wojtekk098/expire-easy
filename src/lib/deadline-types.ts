@@ -52,6 +52,9 @@ export type Item = {
   recurrence_rule?: RecurrenceRule | null;
   start_time?: string | null; // HH:MM lub HH:MM:SS
   end_time?: string | null;
+  /** Czy dla tego terminu wysyłać przypomnienia e-mail / SMS. */
+  notify_email?: boolean | null;
+  notify_sms?: boolean | null;
 };
 
 
