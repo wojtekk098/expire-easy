@@ -17,6 +17,7 @@ import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as PrywatnoscRouteImport } from './routes/prywatnosc'
 import { Route as RegulaminRouteImport } from './routes/regulamin'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as ZwrotyRouteImport } from './routes/zwroty'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
@@ -64,6 +65,11 @@ const RegulaminRoute = RegulaminRouteImport.update({
   path: '/regulamin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
   id: '/ustawienia',
   path: '/ustawienia',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
     | '/oauth/google-calendar/return'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
     | '/oauth/google-calendar/return'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
     | '/oauth/google-calendar/return'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   ProRoute: typeof ProRoute
   PrywatnoscRoute: typeof PrywatnoscRoute
   RegulaminRoute: typeof RegulaminRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UstawieniaRoute: typeof UstawieniaRoute
   ZwrotyRoute: typeof ZwrotyRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegulaminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ustawienia': {
       id: '/ustawienia'
       path: '/ustawienia'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProRoute: ProRoute,
   PrywatnoscRoute: PrywatnoscRoute,
   RegulaminRoute: RegulaminRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UstawieniaRoute: UstawieniaRoute,
   ZwrotyRoute: ZwrotyRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
@@ -336,13 +357,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

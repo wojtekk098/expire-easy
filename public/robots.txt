@@ -12,3 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /ustawienia
+Disallow: /pozycje
+Disallow: /kalendarz
+
+Sitemap: https://mojdeadline.pl/sitemap.xml
