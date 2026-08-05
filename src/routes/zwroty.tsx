@@ -1,25 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { SELLER } from "@/lib/legal";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/zwroty")({
-  head: () => ({
-    meta: [
-      { title: "Zwroty i reklamacje — Deadline" },
-      {
-        name: "description",
-        content:
-          "30-dniowa gwarancja zwrotu pieniędzy dla subskrypcji Deadline Pro oraz sposób złożenia wniosku o zwrot.",
-      },
-      { property: "og:title", content: "Zwroty i reklamacje — Deadline" },
-      {
-        property: "og:description",
-        content: "30-dniowa gwarancja zwrotu pieniędzy dla subskrypcji Deadline Pro.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/zwroty",
+      title: "Zwroty i reklamacje",
+      description:
+        "30-dniowa gwarancja zwrotu pieniędzy dla subskrypcji Deadline Pro oraz sposób złożenia wniosku o zwrot.",
+      ogTitle: "Zwroty i reklamacje",
+      ogDescription: "30-dniowa gwarancja zwrotu pieniędzy dla subskrypcji Deadline Pro.",
+    }),
   component: RefundRoute,
 });
 

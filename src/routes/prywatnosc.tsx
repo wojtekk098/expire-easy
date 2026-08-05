@@ -1,25 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { SELLER } from "@/lib/legal";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/prywatnosc")({
-  head: () => ({
-    meta: [
-      { title: "Polityka prywatności — Deadline" },
-      {
-        name: "description",
-        content:
-          "Jak Deadline przetwarza dane osobowe: zakres danych, cele, podstawy prawne, odbiorcy, retencja i Twoje prawa (RODO).",
-      },
-      { property: "og:title", content: "Polityka prywatności — Deadline" },
-      {
-        property: "og:description",
-        content: "Zakres danych, cele przetwarzania, odbiorcy i Twoje prawa zgodnie z RODO.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/prywatnosc",
+      title: "Polityka prywatności",
+      description:
+        "Jak Deadline przetwarza dane osobowe: zakres danych, cele, podstawy prawne, odbiorcy, retencja i Twoje prawa (RODO).",
+      ogTitle: "Polityka prywatności",
+      ogDescription: "Zakres danych, cele przetwarzania, odbiorcy i Twoje prawa zgodnie z RODO.",
+    }),
   component: PrivacyRoute,
 });
 

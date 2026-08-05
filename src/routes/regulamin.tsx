@@ -1,25 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { SELLER, PADDLE_MOR_PL } from "@/lib/legal";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/regulamin")({
-  head: () => ({
-    meta: [
-      { title: "Regulamin — Deadline" },
-      {
-        name: "description",
-        content:
-          "Regulamin korzystania z aplikacji Deadline: zasady użytkowania, płatności, subskrypcja Pro i warunki rozwiązania umowy.",
-      },
-      { property: "og:title", content: "Regulamin — Deadline" },
-      {
-        property: "og:description",
-        content: "Zasady korzystania z aplikacji Deadline oraz warunki subskrypcji Pro.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/regulamin",
+      title: "Regulamin",
+      description:
+        "Regulamin korzystania z aplikacji Deadline: zasady użytkowania, płatności, subskrypcja Pro i warunki rozwiązania umowy.",
+      ogTitle: "Regulamin",
+      ogDescription: "Zasady korzystania z aplikacji Deadline oraz warunki subskrypcji Pro.",
+    }),
   component: TermsRoute,
 });
 

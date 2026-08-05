@@ -3,26 +3,20 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { confirmReminderSubscription } from "@/lib/reminders.functions";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/potwierdz-przypomnienia")({
   validateSearch: z.object({ token: z.string().optional() }),
-  head: () => ({
-    meta: [
-      { title: "Potwierdź przypomnienia — Deadline" },
-      {
-        name: "description",
-        content:
-          "Potwierdź swój adres e-mail, aby zacząć otrzymywać przypomnienia o terminach z aplikacji Deadline.",
-      },
-      { property: "og:title", content: "Potwierdź przypomnienia — Deadline" },
-      {
-        property: "og:description",
-        content: "Jedno kliknięcie i przypomnienia o terminach trafią na Twój adres e-mail.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/potwierdz-przypomnienia",
+      title: "Potwierdź przypomnienia",
+      description:
+        "Potwierdź swój adres e-mail, aby zacząć otrzymywać przypomnienia o terminach z aplikacji Deadline.",
+      ogTitle: "Potwierdź przypomnienia",
+      ogDescription: "Jedno kliknięcie i przypomnienia o terminach trafią na Twój adres e-mail.",
+      noindex: true,
+    }),
   component: ConfirmPage,
 });
 
