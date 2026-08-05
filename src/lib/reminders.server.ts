@@ -109,6 +109,15 @@ export async function sendConfirmationEmail(
   return true;
 }
 
+/** Normalizuje polski numer do formatu E.164 (+48…). */
+function toE164(input: string): string | null {
+  const trimmed = input.replace(/[\s()-]/g, "");
+  if (/^\+\d{8,15}$/.test(trimmed)) return trimmed;
+  if (/^\d{9}$/.test(trimmed)) return `+48${trimmed}`;
+  if (/^00\d{8,15}$/.test(trimmed)) return `+${trimmed.slice(2)}`;
+  return null;
+}
+
 /** Dzisiejsza data w strefie subskrypcji (YYYY-MM-DD). */
 export function todayIn(timezone: string): string {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -183,7 +192,6 @@ export async function sendReminderSms(phone: string, body: string): Promise<bool
   const from = process.env["TWILIO_FROM"];
   if (!accountSid || !keySid || !keySecret || !from) return false;
 
-  const { toE164 } = await import("./sms.functions");
   const to = toE164(phone);
   if (!to) return false;
 
