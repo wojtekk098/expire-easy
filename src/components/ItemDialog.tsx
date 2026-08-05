@@ -64,6 +64,8 @@ export function ItemDialog({
   const [contactPhone, setContactPhone] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrence, setRecurrence] = useState<RecurrenceRule>("monthly");
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifySms, setNotifySms] = useState(false);
 
   useEffect(() => {
     if (!open) return;
