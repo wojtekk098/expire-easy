@@ -126,6 +126,8 @@ export function ItemDialog({
       contact_phone: contactPhone.trim() || null,
       is_recurring: isRecurring,
       recurrence_rule: isRecurring ? recurrence : null,
+      notify_email: notifyEmail,
+      notify_sms: notifySms,
     };
 
     delete (payload as { id?: string }).id;
