@@ -9,25 +9,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { getPaddleEnvironment, getPaddlePriceId, initializePaddle } from "@/lib/paddle";
 import { createPortalSession } from "@/lib/payments.functions";
 import { PRO_FEATURES, PRO_PRICE_ID, PRO_PRICE_PLN, usePro } from "@/lib/pro";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/pro")({
-  head: () => ({
-    meta: [
-      { title: "Deadline Pro — 25 zł/mies. za spokój" },
-      {
-        name: "description",
-        content:
-          "Przypomnienia SMS, eksport i import CSV, raport PDF oraz terminy w Google Calendar. Deadline Pro za 25 zł miesięcznie.",
-      },
-      { property: "og:title", content: "Deadline Pro — 25 zł/mies." },
-      {
-        property: "og:description",
-        content: "SMS-y, CSV, PDF i Google Calendar dla Twoich terminów.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/pro",
+      title: "Deadline Pro — 25 zł/mies.",
+      description:
+        "Przypomnienia SMS, eksport i import CSV, raport PDF oraz import z Google Calendar. Deadline Pro za 25 zł miesięcznie.",
+      ogTitle: "Deadline Pro — 25 zł/mies.",
+      ogDescription: "SMS-y, CSV, PDF i Google Calendar dla Twoich terminów.",
+      ogType: "product",
+    }),
   component: ProPage,
 });
 

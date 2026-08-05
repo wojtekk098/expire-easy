@@ -9,23 +9,18 @@ import { ItemDetailsSheet } from "@/components/ItemDetailsSheet";
 import { useDeadlines } from "@/lib/deadline-store";
 import { STATUS_META, daysLeft, getStatus, type Item, type ItemStatus } from "@/lib/deadline-types";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — Deadline" },
-      {
-        name: "description",
-        content:
-          "Zobacz od razu, co już wygasło i co kończy się w najbliższych dniach: polisy, certyfikaty, umowy i domeny.",
-      },
-      { property: "og:title", content: "Dashboard — Deadline" },
-      {
-        property: "og:description",
-        content: "Podsumowanie terminów ważności Twojej firmy w jednym widoku.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/",
+      title: "Terminy ważności pod kontrolą",
+      description:
+        "Pilnuj polis, certyfikatów, umów, domen i przeglądów w jednym miejscu. Zobacz od razu, co wygasło i co kończy się w najbliższych dniach.",
+      ogTitle: "Deadline — pilnuj terminów ważności w firmie",
+      ogDescription: "Podsumowanie terminów ważności Twojej firmy w jednym widoku.",
+    }),
   component: Dashboard,
 });
 

@@ -16,6 +16,7 @@ import { ItemRow } from "@/components/ItemRow";
 import { ItemDetailsSheet } from "@/components/ItemDetailsSheet";
 import { useDeadlines } from "@/lib/deadline-store";
 import { daysLeft, getStatus, STATUS_META, type Item, type ItemStatus } from "@/lib/deadline-types";
+import { pageHead } from "@/lib/seo";
 
 type SearchParams = { status: string };
 
@@ -23,21 +24,16 @@ export const Route = createFileRoute("/pozycje")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     status: typeof search["status"] === "string" ? (search["status"] as string) : "all",
   }),
-  head: () => ({
-    meta: [
-      { title: "Wszystkie pozycje — Deadline" },
-      {
-        name: "description",
-        content:
-          "Lista wszystkich śledzonych terminów z filtrowaniem po kategorii i statusie oraz sortowaniem po dacie.",
-      },
-      { property: "og:title", content: "Wszystkie pozycje — Deadline" },
-      {
-        property: "og:description",
-        content: "Filtruj i sortuj terminy ważności swojej firmy.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/pozycje",
+      title: "Wszystkie pozycje",
+      description:
+        "Lista wszystkich śledzonych terminów z filtrowaniem po kategorii i statusie oraz sortowaniem po dacie.",
+      ogTitle: "Wszystkie pozycje",
+      ogDescription: "Filtruj i sortuj terminy ważności swojej firmy.",
+      noindex: true,
+    }),
   component: ItemsPage,
 });
 

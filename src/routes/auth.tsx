@@ -8,23 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Zaloguj się lub utwórz konto — Deadline" },
-      {
-        name: "description",
-        content:
-          "Utwórz darmowe konto w Deadline, aby zapisywać terminy ważności i odbierać przypomnienia e-mail.",
-      },
-      { property: "og:title", content: "Konto w aplikacji Deadline" },
-      {
-        property: "og:description",
-        content: "Zaloguj się e-mailem lub kontem Google i pilnuj terminów swojej firmy.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/auth",
+      title: "Zaloguj się lub utwórz konto",
+      description:
+        "Utwórz darmowe konto w Deadline, aby zapisywać terminy ważności i odbierać przypomnienia e-mail oraz SMS.",
+      ogTitle: "Konto w aplikacji Deadline",
+      ogDescription: "Zaloguj się e-mailem lub kontem Google i pilnuj terminów swojej firmy.",
+    }),
   component: AuthPage,
 });
 

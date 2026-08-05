@@ -12,23 +12,19 @@ import { useDeadlines } from "@/lib/deadline-store";
 import { colorTagMeta } from "@/lib/item-visuals";
 import { formatPL, startOfToday, toISO, type Item } from "@/lib/deadline-types";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/kalendarz")({
-  head: () => ({
-    meta: [
-      { title: "Kalendarz terminów — Deadline" },
-      {
-        name: "description",
-        content:
-          "Terminy ważności w widoku miesiąca, tygodnia i dnia — z osią godzinową i przeciąganiem terminów.",
-      },
-      { property: "og:title", content: "Kalendarz terminów — Deadline" },
-      {
-        property: "og:description",
-        content: "Zobacz w kalendarzu, kiedy wygasają Twoje polisy, umowy i licencje.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/kalendarz",
+      title: "Kalendarz terminów",
+      description:
+        "Terminy ważności w widoku miesiąca, tygodnia i dnia — z osią godzinową i przeciąganiem terminów.",
+      ogTitle: "Kalendarz terminów",
+      ogDescription: "Zobacz w kalendarzu, kiedy wygasają Twoje polisy, umowy i licencje.",
+      noindex: true,
+    }),
   component: CalendarPage,
 });
 

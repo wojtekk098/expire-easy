@@ -38,25 +38,22 @@ import {
 import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/connector-popup";
 import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
 import { PRO_PRICE_PLN, usePro } from "@/lib/pro";
+import { pageHead } from "@/lib/seo";
 
 
 
 
 export const Route = createFileRoute("/ustawienia")({
-  head: () => ({
-    meta: [
-      { title: "Ustawienia — Deadline" },
-      {
-        name: "description",
-        content: "Ustaw adres e-mail do przypomnień i zarządzaj własnymi kategoriami terminów.",
-      },
-      { property: "og:title", content: "Ustawienia — Deadline" },
-      {
-        property: "og:description",
-        content: "Powiadomienia e-mail i kategorie w aplikacji Deadline.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/ustawienia",
+      title: "Ustawienia",
+      description:
+        "Ustaw adres e-mail i numer telefonu do przypomnień, zarządzaj kategoriami oraz integracjami.",
+      ogTitle: "Ustawienia",
+      ogDescription: "Powiadomienia e-mail, SMS i kategorie w aplikacji Deadline.",
+      noindex: true,
+    }),
   component: SettingsPage,
 });
 

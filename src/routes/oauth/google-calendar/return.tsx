@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { completeGoogleCalendarConnect } from "@/lib/gcal.functions";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/oauth/google-calendar/return")({
-  head: () => ({
-    meta: [
-      { title: "Łączenie z Google Calendar — Deadline" },
-      { name: "description", content: "Kończymy podłączanie Twojego kalendarza Google." },
-      { property: "og:title", content: "Łączenie z Google Calendar — Deadline" },
-      { property: "og:description", content: "Kończymy podłączanie Twojego kalendarza Google." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/oauth/google-calendar/return",
+      title: "Łączenie z Google Calendar",
+      description:
+        "Kończymy podłączanie Twojego kalendarza Google do aplikacji Deadline.",
+      ogTitle: "Łączenie z Google Calendar",
+      ogDescription: "Kończymy podłączanie Twojego kalendarza Google.",
+      noindex: true,
+    }),
   component: OAuthReturn,
   errorComponent: () => (
     <p className="p-6 text-sm text-muted-foreground">Nie udało się dokończyć połączenia.</p>
