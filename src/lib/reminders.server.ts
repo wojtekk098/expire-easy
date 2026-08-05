@@ -270,8 +270,10 @@ export async function dispatchReminders(): Promise<DispatchResult> {
         continue;
       }
 
-      if (await sendReminderEmail(sub.email as string, item, days)) result.emails += 1;
-      if (sub.sms_enabled && sub.phone) {
+      if (item.notify_email !== false) {
+        if (await sendReminderEmail(sub.email as string, item, days)) result.emails += 1;
+      }
+      if (item.notify_sms === true && sub.sms_enabled && sub.phone) {
         const ok = await sendReminderSms(
           sub.phone as string,
           `${reminderSubject(item, days)} (${dateLabel(item.expiry_date)}). Deadline`,
