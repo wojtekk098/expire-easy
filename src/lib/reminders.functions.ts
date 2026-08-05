@@ -17,6 +17,8 @@ const itemSchema = z.object({
   contact_phone: z.string().nullable().optional(),
   is_recurring: z.boolean().nullable().optional(),
   recurrence_rule: z.string().nullable().optional(),
+  notify_email: z.boolean().nullable().optional(),
+  notify_sms: z.boolean().nullable().optional(),
 });
 
 export const getReminderSubscription = createServerFn({ method: "POST" })
