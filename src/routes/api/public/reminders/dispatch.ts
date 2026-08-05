@@ -6,8 +6,11 @@ import { createFileRoute } from "@tanstack/react-router";
  */
 async function handle(request: Request) {
   const apikey = request.headers.get("apikey") ?? "";
-  const expected = process.env["SUPABASE_ANON_KEY"] ?? "";
-  if (!expected || apikey !== expected) {
+  const allowed = [
+    process.env["SUPABASE_PUBLISHABLE_KEY"],
+    process.env["SUPABASE_ANON_KEY"],
+  ].filter((v): v is string => Boolean(v));
+  if (allowed.length === 0 || !allowed.includes(apikey)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
