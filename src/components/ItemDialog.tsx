@@ -378,10 +378,36 @@ export function ItemDialog({
                 );
               })}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Powiadomienia e-mail włączymy w Ustawieniach.
-            </p>
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              <Label className="text-xs font-normal text-muted-foreground">
+                Kanały przypomnień dla tego terminu
+              </Label>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="item-notify-email"
+                  checked={notifyEmail}
+                  onCheckedChange={(v) => setNotifyEmail(v === true)}
+                />
+                <Label htmlFor="item-notify-email" className="font-normal">
+                  Przypomnienie e-mailem
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="item-notify-sms"
+                  checked={notifySms}
+                  onCheckedChange={(v) => setNotifySms(v === true)}
+                />
+                <Label htmlFor="item-notify-sms" className="font-normal">
+                  Przypomnienie SMS-em
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Adres e-mail i numer telefonu ustawisz raz w Ustawieniach.
+              </p>
+            </div>
           </div>
+
         </div>
 
         <DialogFooter>
