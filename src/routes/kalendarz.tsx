@@ -152,6 +152,16 @@ function CalendarPage() {
             <Button variant="outline" size="icon" onClick={() => move(1)} aria-label="Dalej">
               <ChevronRight className="size-4" />
             </Button>
+            <Button
+              className="ml-2"
+              onClick={() => {
+                setEditing(null);
+                setDialogOpen(true);
+              }}
+            >
+              <Plus className="size-4" />
+              <span className="hidden sm:inline">Dodaj termin</span>
+            </Button>
           </div>
         </div>
 
