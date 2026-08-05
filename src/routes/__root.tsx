@@ -23,6 +23,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { registerAppServiceWorker } from "@/lib/pwa";
 import { useAuth } from "@/hooks/useAuth";
+import { PublicLanding } from "@/components/PublicLanding";
+
 
 
 
@@ -173,12 +175,22 @@ function RootComponent() {
   }
 
   if (loading || !isAuthenticated) {
+    // Strona główna: statyczna treść marketingowa w początkowym HTML (SSR),
+    // czytelna dla botów SEO / podglądów linków. Logika przekierowania bez zmian.
+    if (pathname === "/") {
+      return (
+        <ThemeProvider>
+          <PublicLanding />
+        </ThemeProvider>
+      );
+    }
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <p className="text-sm text-muted-foreground">Wczytywanie…</p>
       </div>
     );
   }
+
 
 
 
