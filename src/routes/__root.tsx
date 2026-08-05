@@ -23,6 +23,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { registerAppServiceWorker } from "@/lib/pwa";
 import { useAuth } from "@/hooks/useAuth";
+import { PublicLanding } from "@/components/PublicLanding";
+
 
 
 
