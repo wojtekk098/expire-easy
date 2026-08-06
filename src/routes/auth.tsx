@@ -52,6 +52,28 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
+  const [sentReset, setSentReset] = useState(false);
+
+  async function handleForgotPassword() {
+    const mail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+      toast.error("Najpierw wpisz swój adres e-mail");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(mail, {
+        redirectTo: `${window.location.origin}/reset-hasla`,
+      });
+      if (error) throw error;
+      setSentReset(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nie udało się wysłać linku");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -130,7 +152,18 @@ function AuthPage() {
           <span className="text-lg font-semibold">Deadline</span>
         </div>
 
-        {sentConfirm ? (
+        {sentReset ? (
+          <div className="panel space-y-3 p-6">
+            <h1 className="text-lg font-semibold">Sprawdź skrzynkę</h1>
+            <p className="text-sm text-muted-foreground">
+              Wysłaliśmy link do zmiany hasła na <span className="font-medium">{email}</span>.
+              Kliknij go, aby ustawić nowe hasło.
+            </p>
+            <Button variant="outline" onClick={() => setSentReset(false)}>
+              Wróć
+            </Button>
+          </div>
+        ) : sentConfirm ? (
           <div className="panel space-y-3 p-6">
             <h1 className="text-lg font-semibold">Sprawdź skrzynkę</h1>
             <p className="text-sm text-muted-foreground">
@@ -142,6 +175,7 @@ function AuthPage() {
             </Button>
           </div>
         ) : (
+
           <div className="panel space-y-5 p-6">
             <div>
               <h1 className="text-lg font-semibold">
@@ -190,6 +224,15 @@ function AuthPage() {
               <Button type="submit" className="w-full" disabled={busy}>
                 {busy ? "Chwilka…" : mode === "signup" ? "Utwórz konto" : "Zaloguj się"}
               </Button>
+              <button
+                type="button"
+                className="w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+                onClick={handleForgotPassword}
+                disabled={busy}
+              >
+                Nie pamiętam hasła
+              </button>
+
             </form>
 
             <p className="text-center text-sm text-muted-foreground">
