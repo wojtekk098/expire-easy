@@ -183,7 +183,11 @@ export async function sendPushNotifications(
         },
         { subject, publicKey, privateKey },
       );
-      const response = await fetch(device.endpoint as string, payload);
+      const response = await fetch(device.endpoint as string, {
+        method: payload.method,
+        headers: payload.headers,
+        body: new Uint8Array(payload.body) as unknown as BodyInit,
+      });
       if (response.ok) {
         sent += 1;
       } else if (response.status === 404 || response.status === 410) {
