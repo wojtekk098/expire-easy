@@ -185,7 +185,7 @@ export async function sendPushNotifications(
       );
       const response = await fetch(device.endpoint as string, {
         method: payload.method,
-        headers: payload.headers,
+        headers: payload.headers as unknown as Record<string, string>,
         body: new Uint8Array(payload.body) as unknown as BodyInit,
       });
       if (response.ok) {
