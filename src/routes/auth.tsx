@@ -73,12 +73,19 @@ function AuthPage() {
           options: { emailRedirectTo: returnUrl ?? window.location.origin },
         });
         if (error) throw error;
+        // Supabase zwraca "pustego" użytkownika bez tożsamości, gdy e-mail jest już zajęty
+        if (data.user && (data.user.identities?.length ?? 0) === 0) {
+          toast.error("Ten adres e-mail ma już konto — zaloguj się");
+          setMode("signin");
+          return;
+        }
         if (data.session) {
           toast.success("Konto utworzone");
           goBack();
         } else {
           setSentConfirm(true);
         }
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: mail, password });
         if (error) throw error;
