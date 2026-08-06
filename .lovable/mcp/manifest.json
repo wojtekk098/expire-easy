@@ -1,0 +1,200 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://afkfdxkbvodbzhaogjpe.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "deadline-minder",
+      "version": "0.1.0",
+      "title": "Deadline Minder"
+    },
+    "tools": [
+      {
+        "name": "list_deadlines",
+        "title": "Lista terminów",
+        "description": "Zwraca terminy ważności zalogowanego użytkownika (polisy, umowy, certyfikaty itp.), posortowane po dacie ważności.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Filtr po nazwie terminu (fragment tekstu)."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maksymalna liczba pozycji, domyślnie 50."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_deadline",
+        "title": "Dodaj termin",
+        "description": "Dodaje nowy termin ważności na koncie zalogowanego użytkownika. Data w formacie YYYY-MM-DD.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Nazwa terminu, np. „Polisa OC samochodu”."
+            },
+            "expiry_date": {
+              "type": "string",
+              "description": "Data ważności w formacie YYYY-MM-DD."
+            },
+            "category": {
+              "type": "string",
+              "description": "Kategoria, np. Polisy, Umowy, Certyfikaty. Domyślnie „Inne”."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Notatki do terminu."
+            },
+            "contact_name": {
+              "type": "string"
+            },
+            "contact_email": {
+              "type": "string"
+            },
+            "contact_phone": {
+              "type": "string"
+            },
+            "reminder_days_before": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Ile dni przed terminem przypomnieć, np. [7, 1, 0]."
+            },
+            "notify_email": {
+              "type": "boolean",
+              "description": "Przypomnienie e-mail. Domyślnie włączone."
+            },
+            "notify_sms": {
+              "type": "boolean",
+              "description": "Przypomnienie SMS (wymaga planu Pro)."
+            },
+            "notify_time": {
+              "type": "string",
+              "description": "Godzina wysyłki przypomnienia, np. „08:00”."
+            }
+          },
+          "required": [
+            "name",
+            "expiry_date"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_deadline",
+        "title": "Zaktualizuj termin",
+        "description": "Aktualizuje istniejący termin zalogowanego użytkownika. Podaj tylko pola, które mają się zmienić.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Identyfikator terminu (UUID)."
+            },
+            "name": {
+              "type": "string"
+            },
+            "expiry_date": {
+              "type": "string",
+              "description": "Nowa data ważności w formacie YYYY-MM-DD."
+            },
+            "category": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "contact_name": {
+              "type": "string"
+            },
+            "contact_email": {
+              "type": "string"
+            },
+            "contact_phone": {
+              "type": "string"
+            },
+            "reminder_days_before": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "notify_email": {
+              "type": "boolean"
+            },
+            "notify_sms": {
+              "type": "boolean"
+            },
+            "notify_time": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_deadline",
+        "title": "Usuń termin",
+        "description": "Trwale usuwa termin zalogowanego użytkownika.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Identyfikator terminu (UUID)."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
