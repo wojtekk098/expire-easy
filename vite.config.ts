@@ -44,6 +44,7 @@ export default defineConfig({
         devOptions: { enabled: false },
         workbox: {
           globPatterns: ["**/*.{js,css,svg,png,woff2}"],
+          importScripts: ["/push-handler.js"],
           navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/_serverFn\//, /^\/lovable\//],
           runtimeCaching: [
             {

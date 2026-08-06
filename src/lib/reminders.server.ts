@@ -42,6 +42,9 @@ export function normalizeItems(items: unknown): Item[] {
         recurrence_rule: i.recurrence_rule ? String(i.recurrence_rule).slice(0, 100) : null,
         notify_email: i.notify_email !== false,
         notify_sms: i.notify_sms === true,
+        notify_time: /^\d{2}:\d{2}/.test(String(i.notify_time ?? ""))
+          ? String(i.notify_time).slice(0, 5)
+          : "00:00",
       } as Item;
     });
 
@@ -129,6 +132,75 @@ export function todayIn(timezone: string): string {
     day: "2-digit",
   });
   return fmt.format(new Date());
+}
+
+/** Aktualna godzina (0-23) w strefie subskrypcji. */
+export function hourIn(timezone: string): number {
+  const value = new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone || "Europe/Warsaw",
+    hour: "2-digit",
+    hour12: false,
+  }).format(new Date());
+  return Number(value.slice(0, 2));
+}
+
+/** Godzina powiadomienia zapisana w terminie (domyślnie 0 = 00:00). */
+export function notifyHour(item: Item): number {
+  const raw = String(item.notify_time ?? "00:00");
+  const parsed = Number(raw.slice(0, 2));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Wysyła powiadomienie push do wszystkich urządzeń danej subskrypcji. */
+export async function sendPushNotifications(
+  subscriptionId: string,
+  title: string,
+  body: string,
+): Promise<number> {
+  const publicKey = process.env["VAPID_PUBLIC_KEY"];
+  const privateKey = process.env["VAPID_PRIVATE_KEY"];
+  if (!publicKey || !privateKey) return 0;
+  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:kontakt@mojdeadline.pl";
+
+  const supabase = await admin();
+  const { data: devices } = await supabase
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth")
+    .eq("subscription_id", subscriptionId);
+  if (!devices?.length) return 0;
+
+  const { buildPushPayload } = await import("@block65/webcrypto-web-push");
+  let sent = 0;
+
+  for (const device of devices) {
+    try {
+      const payload = await buildPushPayload(
+        { data: { title, body, url: "/" }, options: { ttl: 60 * 60 * 24 } },
+        {
+          endpoint: device.endpoint as string,
+          expirationTime: null,
+          keys: { p256dh: device.p256dh as string, auth: device.auth as string },
+        },
+        { subject, publicKey, privateKey },
+      );
+      const response = await fetch(device.endpoint as string, {
+        method: payload.method,
+        headers: payload.headers as unknown as Record<string, string>,
+        body: new Uint8Array(payload.body) as unknown as BodyInit,
+      });
+      if (response.ok) {
+        sent += 1;
+      } else if (response.status === 404 || response.status === 410) {
+        await supabase.from("push_subscriptions").delete().eq("id", device.id as string);
+      } else {
+        console.error(`Web push failed [${response.status}]: ${await response.text()}`);
+      }
+    } catch (error) {
+      console.error("Web push error", error);
+    }
+  }
+
+  return sent;
 }
 
 /** Różnica dni między datą terminu i „dziś” (obie jako YYYY-MM-DD). */
@@ -231,10 +303,15 @@ export type DispatchResult = {
   subscriptions: number;
   emails: number;
   sms: number;
+  push: number;
   skipped: number;
 };
 
-/** Codzienna wysyłka: dla każdej potwierdzonej subskrypcji sprawdza terminy. */
+/**
+ * Wysyłka przypomnień. Uruchamiana co godzinę — dla każdego terminu
+ * wysyłamy o godzinie zapisanej w polu `notify_time` (domyślnie 00:00),
+ * liczonej w strefie czasowej subskrypcji.
+ */
 export async function dispatchReminders(): Promise<DispatchResult> {
   const supabase = await admin();
   const { data: subs, error } = await supabase
@@ -244,11 +321,13 @@ export async function dispatchReminders(): Promise<DispatchResult> {
     .not("confirmed_at", "is", null);
   if (error) throw new Error(error.message);
 
-  const result: DispatchResult = { subscriptions: 0, emails: 0, sms: 0, skipped: 0 };
+  const result: DispatchResult = { subscriptions: 0, emails: 0, sms: 0, push: 0, skipped: 0 };
 
   for (const sub of subs ?? []) {
     result.subscriptions += 1;
-    const today = todayIn((sub.timezone as string) ?? "Europe/Warsaw");
+    const timezone = (sub.timezone as string) ?? "Europe/Warsaw";
+    const today = todayIn(timezone);
+    const currentHour = hourIn(timezone);
     const items = Array.isArray(sub.items) ? (sub.items as unknown as Item[]) : [];
 
     for (const item of items) {
@@ -257,6 +336,7 @@ export async function dispatchReminders(): Promise<DispatchResult> {
       if (!Number.isFinite(days) || days < 0) continue;
       const wanted = Array.isArray(item.reminder_days_before) ? item.reminder_days_before : [];
       if (!wanted.includes(days)) continue;
+      if (notifyHour(item) !== currentHour) continue;
 
       // Idempotencja: jedna wysyłka na termin/próg/dzień.
       const { error: claimError } = await supabase.from("reminder_sends").insert({
@@ -280,6 +360,11 @@ export async function dispatchReminders(): Promise<DispatchResult> {
         );
         if (ok) result.sms += 1;
       }
+      result.push += await sendPushNotifications(
+        sub.id as string,
+        reminderSubject(item, days),
+        `${item.category || "Termin"} — ${dateLabel(item.expiry_date)}`,
+      );
     }
   }
 

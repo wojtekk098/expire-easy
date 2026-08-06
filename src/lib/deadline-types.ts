@@ -55,7 +55,11 @@ export type Item = {
   /** Czy dla tego terminu wysyłać przypomnienia e-mail / SMS. */
   notify_email?: boolean | null;
   notify_sms?: boolean | null;
+  /** Godzina wysyłki przypomnień (HH:MM, domyślnie 00:00). */
+  notify_time?: string | null;
 };
+
+export const DEFAULT_NOTIFY_TIME = "00:00";
 
 
 export const DEFAULT_CATEGORIES = [
