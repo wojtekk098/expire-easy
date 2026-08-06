@@ -19,5 +19,7 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listDeadlinesTool, createDeadlineTool, updateDeadlineTool, deleteDeadlineTool],
+  // Rzutowanie: narzędzia bez outputSchema są poprawne w SDK, ale kolidują
+  // z exactOptionalPropertyTypes w tym projekcie.
+  tools: [listDeadlinesTool, createDeadlineTool, updateDeadlineTool, deleteDeadlineTool] as never[],
 });
