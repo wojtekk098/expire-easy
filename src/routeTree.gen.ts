@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KalendarzRouteImport } from './routes/kalendarz'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PotwierdzPrzypomnieniaRouteImport } from './routes/potwierdz-przypomnienia'
 import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
@@ -20,6 +21,9 @@ import { Route as RegulaminRouteImport } from './routes/regulamin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as ZwrotyRouteImport } from './routes/zwroty'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicRemindersDispatchRouteImport } from './routes/api/public/reminders/dispatch'
@@ -39,6 +43,11 @@ const AuthRoute = AuthRouteImport.update({
 const KalendarzRoute = KalendarzRouteImport.update({
   id: '/kalendarz',
   path: '/kalendarz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PotwierdzPrzypomnieniaRoute = PotwierdzPrzypomnieniaRouteImport.update({
@@ -81,6 +90,24 @@ const ZwrotyRoute = ZwrotyRouteImport.update({
   path: '/zwroty',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OauthGoogleCalendarReturnRoute =
   OauthGoogleCalendarReturnRouteImport.update({
     id: '/oauth/google-calendar/return',
@@ -114,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/mcp': typeof McpRoute
   '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
@@ -122,6 +150,9 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/reminders/dispatch': typeof ApiPublicRemindersDispatchRoute
@@ -132,6 +163,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/mcp': typeof McpRoute
   '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
@@ -140,6 +172,9 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/reminders/dispatch': typeof ApiPublicRemindersDispatchRoute
@@ -151,6 +186,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/kalendarz': typeof KalendarzRoute
+  '/mcp': typeof McpRoute
   '/potwierdz-przypomnienia': typeof PotwierdzPrzypomnieniaRoute
   '/pozycje': typeof PozycjeRoute
   '/pro': typeof ProRoute
@@ -159,6 +195,9 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/reminders/dispatch': typeof ApiPublicRemindersDispatchRoute
@@ -171,6 +210,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/mcp'
     | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
@@ -179,6 +219,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
     | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
     | '/api/public/reminders/dispatch'
@@ -189,6 +232,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/mcp'
     | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
@@ -197,6 +241,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
     | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
     | '/api/public/reminders/dispatch'
@@ -207,6 +254,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/kalendarz'
+    | '/mcp'
     | '/potwierdz-przypomnienia'
     | '/pozycje'
     | '/pro'
@@ -215,6 +263,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
     | '/oauth/google-calendar/return'
     | '/api/public/payments/webhook'
     | '/api/public/reminders/dispatch'
@@ -226,6 +277,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   KalendarzRoute: typeof KalendarzRoute
+  McpRoute: typeof McpRoute
   PotwierdzPrzypomnieniaRoute: typeof PotwierdzPrzypomnieniaRoute
   PozycjeRoute: typeof PozycjeRoute
   ProRoute: typeof ProRoute
@@ -234,6 +286,9 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UstawieniaRoute: typeof UstawieniaRoute
   ZwrotyRoute: typeof ZwrotyRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRemindersDispatchRoute: typeof ApiPublicRemindersDispatchRoute
@@ -262,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/kalendarz'
       fullPath: '/kalendarz'
       preLoaderRoute: typeof KalendarzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/potwierdz-przypomnienia': {
@@ -320,6 +382,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZwrotyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oauth/google-calendar/return': {
       id: '/oauth/google-calendar/return'
       path: '/oauth/google-calendar/return'
@@ -362,6 +445,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   KalendarzRoute: KalendarzRoute,
+  McpRoute: McpRoute,
   PotwierdzPrzypomnieniaRoute: PotwierdzPrzypomnieniaRoute,
   PozycjeRoute: PozycjeRoute,
   ProRoute: ProRoute,
@@ -370,6 +454,10 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UstawieniaRoute: UstawieniaRoute,
   ZwrotyRoute: ZwrotyRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRemindersDispatchRoute: ApiPublicRemindersDispatchRoute,
