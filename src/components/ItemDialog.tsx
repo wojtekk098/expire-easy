@@ -37,7 +37,7 @@ import {
 
 
 const NEW_CATEGORY = "__new__";
-const REMINDER_OPTIONS = [60, 30, 14, 7, 3, 1];
+const REMINDER_OPTIONS = [60, 30, 14, 7, 3, 1, 0];
 
 export function ItemDialog({
   open,
@@ -367,7 +367,7 @@ export function ItemDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Przypomnij mi przed terminem</Label>
+            <Label>Przypomnij mi</Label>
             <div className="flex flex-wrap gap-2">
               {REMINDER_OPTIONS.map((day) => {
                 const active = reminders.includes(day);
@@ -383,7 +383,7 @@ export function ItemDialog({
                         : "border-border bg-card text-muted-foreground hover:bg-muted",
                     )}
                   >
-                    {day === 1 ? "1 dzień" : `${day} dni`}
+                    {day === 0 ? "W dniu terminu" : day === 1 ? "1 dzień przed" : `${day} dni przed`}
                   </button>
                 );
               })}
