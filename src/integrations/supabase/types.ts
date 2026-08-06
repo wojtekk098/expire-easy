@@ -57,6 +57,7 @@ export type Database = {
           notes: string | null
           notify_email: boolean
           notify_sms: boolean
+          notify_time: string
           recurrence_rule: string | null
           reminder_days_before: number[]
           start_time: string | null
@@ -79,6 +80,7 @@ export type Database = {
           notes?: string | null
           notify_email?: boolean
           notify_sms?: boolean
+          notify_time?: string
           recurrence_rule?: string | null
           reminder_days_before?: number[]
           start_time?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           notes?: string | null
           notify_email?: boolean
           notify_sms?: boolean
+          notify_time?: string
           recurrence_rule?: string | null
           reminder_days_before?: number[]
           start_time?: string | null
@@ -110,8 +113,47 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminder_sends: {
         Row: {
+          channel: string
           created_at: string
           days_before: number
           id: string
@@ -120,6 +162,7 @@ export type Database = {
           subscription_id: string
         }
         Insert: {
+          channel?: string
           created_at?: string
           days_before: number
           id?: string
@@ -128,6 +171,7 @@ export type Database = {
           subscription_id: string
         }
         Update: {
+          channel?: string
           created_at?: string
           days_before?: number
           id?: string
