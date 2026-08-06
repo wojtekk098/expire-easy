@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { useDeadlines } from "@/lib/deadline-store";
 import { COLOR_TAGS } from "@/lib/item-visuals";
 import {
+  DEFAULT_NOTIFY_TIME,
   DEFAULT_REMINDERS,
   RECURRENCE_OPTIONS,
   toISO,
@@ -66,6 +67,7 @@ export function ItemDialog({
   const [recurrence, setRecurrence] = useState<RecurrenceRule>("monthly");
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifySms, setNotifySms] = useState(false);
+  const [notifyTime, setNotifyTime] = useState(DEFAULT_NOTIFY_TIME);
 
   useEffect(() => {
     if (!open) return;
@@ -85,6 +87,7 @@ export function ItemDialog({
     setRecurrence((item?.recurrence_rule as RecurrenceRule) ?? "monthly");
     setNotifyEmail(item ? item.notify_email !== false : true);
     setNotifySms(item ? item.notify_sms === true : false);
+    setNotifyTime(item?.notify_time?.slice(0, 5) || DEFAULT_NOTIFY_TIME);
   }, [open, item, defaultDate, categories]);
 
 
@@ -128,6 +131,7 @@ export function ItemDialog({
       recurrence_rule: isRecurring ? recurrence : null,
       notify_email: notifyEmail,
       notify_sms: notifySms,
+      notify_time: notifyTime || DEFAULT_NOTIFY_TIME,
     };
 
     delete (payload as { id?: string }).id;
@@ -407,6 +411,24 @@ export function ItemDialog({
                 <Label htmlFor="item-notify-sms" className="font-normal">
                   Przypomnienie SMS-em
                 </Label>
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="item-notify-time"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  Godzina wysyłki przypomnień
+                </Label>
+                <Input
+                  id="item-notify-time"
+                  type="time"
+                  value={notifyTime}
+                  onChange={(e) => setNotifyTime(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Domyślnie 00:00 — przypomnienie przyjdzie o tej godzinie w dniach wskazanych
+                  powyżej (czas polski).
+                </p>
               </div>
               <p className="text-xs text-muted-foreground">
                 Adres e-mail i numer telefonu ustawisz raz w Ustawieniach.
