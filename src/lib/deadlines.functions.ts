@@ -28,6 +28,7 @@ const basePayload = {
   end_time: timeSchema.optional(),
   notify_email: z.boolean().optional(),
   notify_sms: z.boolean().optional(),
+  notify_time: timeSchema.optional(),
 };
 
 const createSchema = z.object(basePayload);
