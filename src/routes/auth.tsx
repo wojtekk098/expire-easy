@@ -10,7 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { pageHead } from "@/lib/seo";
 
+function safeNext(value: unknown): string | undefined {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
+    ? value
+    : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({ next: safeNext(s["next"]) }),
   head: () =>
     pageHead({
       path: "/auth",
@@ -25,6 +32,18 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const returnUrl = next
+    ? `${typeof window === "undefined" ? "" : window.location.origin}${next}`
+    : undefined;
+
+  function goBack() {
+    if (next) {
+      window.location.href = next;
+      return;
+    }
+    navigate({ to: "/" });
+  }
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,12 +67,12 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email: mail,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: returnUrl ?? window.location.origin },
         });
         if (error) throw error;
         if (data.session) {
           toast.success("Konto utworzone");
-          navigate({ to: "/" });
+          goBack();
         } else {
           setSentConfirm(true);
         }
@@ -61,7 +80,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: mail, password });
         if (error) throw error;
         toast.success("Zalogowano");
-        navigate({ to: "/" });
+        goBack();
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Coś poszło nie tak";
@@ -80,7 +99,7 @@ function AuthPage() {
   async function handleGoogle() {
     setBusy(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: returnUrl ?? window.location.origin,
     });
     if (result.error) {
       setBusy(false);
@@ -88,7 +107,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/" });
+    goBack();
   }
 
   return (
