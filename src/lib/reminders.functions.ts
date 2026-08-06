@@ -19,6 +19,7 @@ const itemSchema = z.object({
   recurrence_rule: z.string().nullable().optional(),
   notify_email: z.boolean().nullable().optional(),
   notify_sms: z.boolean().nullable().optional(),
+  notify_time: z.string().nullable().optional(),
 });
 
 export const getReminderSubscription = createServerFn({ method: "POST" })
@@ -165,4 +166,55 @@ export const confirmReminderSubscription = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!row) return { confirmed: false as const };
     return { confirmed: true as const, email: row.email as string };
+  });
+
+/** Publiczny klucz do powiadomień push w aplikacji (bezpieczny w przeglądarce). */
+export const getPushPublicKey = createServerFn({ method: "GET" }).handler(async () => ({
+  publicKey: process.env["VAPID_PUBLIC_KEY"] ?? "",
+}));
+
+const deviceSchema = z.object({
+  token: z.string().uuid(),
+  endpoint: z.string().url().max(600),
+  p256dh: z.string().min(10).max(300),
+  auth: z.string().min(5).max(200),
+});
+
+/** Rejestruje urządzenie (telefon z zainstalowaną aplikacją) do powiadomień push. */
+export const savePushDevice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => deviceSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { admin } = await import("./reminders.server");
+    const supabase = await admin();
+    const { data: sub } = await supabase
+      .from("reminder_subscriptions")
+      .select("id")
+      .eq("token", data.token)
+      .maybeSingle();
+    if (!sub) return { saved: false as const };
+    const { error } = await supabase.from("push_subscriptions").upsert(
+      {
+        subscription_id: sub.id as string,
+        endpoint: data.endpoint,
+        p256dh: data.p256dh,
+        auth: data.auth,
+      },
+      { onConflict: "endpoint" },
+    );
+    if (error) throw new Error(error.message);
+    return { saved: true as const };
+  });
+
+/** Wyłącza powiadomienia push dla tego urządzenia. */
+export const deletePushDevice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ endpoint: z.string().url().max(600) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { admin } = await import("./reminders.server");
+    const supabase = await admin();
+    await supabase.from("push_subscriptions").delete().eq("endpoint", data.endpoint);
+    return { ok: true };
   });
