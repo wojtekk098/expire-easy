@@ -27,7 +27,7 @@ export const Route = createFileRoute("/pro")({
 });
 
 function ProPage() {
-  const { pro, subscription } = usePro();
+  const { pro, subscription, refresh } = usePro();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
