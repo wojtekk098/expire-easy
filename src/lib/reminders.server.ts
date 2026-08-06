@@ -303,10 +303,15 @@ export type DispatchResult = {
   subscriptions: number;
   emails: number;
   sms: number;
+  push: number;
   skipped: number;
 };
 
-/** Codzienna wysyłka: dla każdej potwierdzonej subskrypcji sprawdza terminy. */
+/**
+ * Wysyłka przypomnień. Uruchamiana co godzinę — dla każdego terminu
+ * wysyłamy o godzinie zapisanej w polu `notify_time` (domyślnie 00:00),
+ * liczonej w strefie czasowej subskrypcji.
+ */
 export async function dispatchReminders(): Promise<DispatchResult> {
   const supabase = await admin();
   const { data: subs, error } = await supabase
@@ -316,11 +321,13 @@ export async function dispatchReminders(): Promise<DispatchResult> {
     .not("confirmed_at", "is", null);
   if (error) throw new Error(error.message);
 
-  const result: DispatchResult = { subscriptions: 0, emails: 0, sms: 0, skipped: 0 };
+  const result: DispatchResult = { subscriptions: 0, emails: 0, sms: 0, push: 0, skipped: 0 };
 
   for (const sub of subs ?? []) {
     result.subscriptions += 1;
-    const today = todayIn((sub.timezone as string) ?? "Europe/Warsaw");
+    const timezone = (sub.timezone as string) ?? "Europe/Warsaw";
+    const today = todayIn(timezone);
+    const currentHour = hourIn(timezone);
     const items = Array.isArray(sub.items) ? (sub.items as unknown as Item[]) : [];
 
     for (const item of items) {
@@ -329,6 +336,7 @@ export async function dispatchReminders(): Promise<DispatchResult> {
       if (!Number.isFinite(days) || days < 0) continue;
       const wanted = Array.isArray(item.reminder_days_before) ? item.reminder_days_before : [];
       if (!wanted.includes(days)) continue;
+      if (notifyHour(item) !== currentHour) continue;
 
       // Idempotencja: jedna wysyłka na termin/próg/dzień.
       const { error: claimError } = await supabase.from("reminder_sends").insert({
@@ -352,6 +360,11 @@ export async function dispatchReminders(): Promise<DispatchResult> {
         );
         if (ok) result.sms += 1;
       }
+      result.push += await sendPushNotifications(
+        sub.id as string,
+        reminderSubject(item, days),
+        `${item.category || "Termin"} — ${dateLabel(item.expiry_date)}`,
+      );
     }
   }
 
