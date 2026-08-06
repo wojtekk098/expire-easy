@@ -42,6 +42,9 @@ export function normalizeItems(items: unknown): Item[] {
         recurrence_rule: i.recurrence_rule ? String(i.recurrence_rule).slice(0, 100) : null,
         notify_email: i.notify_email !== false,
         notify_sms: i.notify_sms === true,
+        notify_time: /^\d{2}:\d{2}/.test(String(i.notify_time ?? ""))
+          ? String(i.notify_time).slice(0, 5)
+          : "00:00",
       } as Item;
     });
 
