@@ -144,8 +144,10 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
       .single();
     if (insertError) throw new Error(insertError.message);
 
-    await sendConfirmationEmail(data.email, confirmToken, origin);
-    return { token: inserted.token as string, confirmed: false };
+    const confirmed = Boolean(inserted.confirmed_at);
+    if (!confirmed) await sendConfirmationEmail(email, confirmToken, origin);
+    return { token: inserted.token as string, confirmed };
+
   });
 
 export const syncReminderItems = createServerFn({ method: "POST" })
