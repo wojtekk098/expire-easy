@@ -101,7 +101,6 @@ function SettingsPage() {
   const [gcalBusy, setGcalBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
-  const [email, setEmail] = useState("");
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -146,16 +145,11 @@ function SettingsPage() {
   }, [user, gcalStatus]);
 
   useEffect(() => {
-    if (user?.email) setEmail((current) => current || user.email!);
-  }, [user]);
-
-  useEffect(() => {
     const token = localStorage.getItem(REMINDER_TOKEN_KEY);
     if (!token) return;
     load({ data: { token } })
       .then((sub) => {
         if (!sub) return;
-        setEmail(sub.email);
         setEmailOn(sub.enabled);
         setPhone(sub.phone);
         setSmsOn(sub.smsEnabled);
