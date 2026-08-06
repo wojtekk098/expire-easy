@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { PromoCodeForm } from "@/components/PromoCodeForm";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { getPaddleEnvironment, getPaddlePriceId, initializePaddle } from "@/lib/paddle";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/pro")({
 });
 
 function ProPage() {
-  const { pro, subscription } = usePro();
+  const { pro, subscription, refresh } = usePro();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -139,9 +140,12 @@ function ProPage() {
             </>
           ) : user ? (
             <>
-              <Button onClick={handleSubscribe} disabled={loading}>
-                {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
-              </Button>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button onClick={handleSubscribe} disabled={loading}>
+                  {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
+                </Button>
+                <PromoCodeForm onRedeemed={refresh} />
+              </div>
               <p className="text-xs text-muted-foreground">
                 Proces zamówienia obsługuje nasz sprzedawca internetowy Paddle.com — Paddle.com jest
                 sprzedawcą (Merchant of Record) wszystkich zamówień, obsługuje zapytania obsługi
@@ -153,7 +157,6 @@ function ProPage() {
                   ? " Podgląd działa w trybie testowym — użyj karty 4242 4242 4242 4242."
                   : ""}
               </p>
-
             </>
           ) : (
             <>

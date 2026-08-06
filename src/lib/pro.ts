@@ -42,32 +42,39 @@ function computeActive(sub: Subscription | null): boolean {
   return false;
 }
 
-/** Status dostępu Pro na podstawie subskrypcji użytkownika. */
+/** Status dostępu Pro na podstawie subskrypcji lub kodu promocyjnego. */
 export function usePro(): {
   pro: boolean;
   ready: boolean;
   subscription: Subscription | null;
+  proUntil: string | null;
   refresh: () => void;
 } {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [proUntil, setProUntil] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) {
       setSubscription(null);
+      setProUntil(null);
       setReady(true);
       return;
     }
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status, current_period_end, cancel_at_period_end, price_id")
-      .eq("user_id", user.id)
-      .eq("environment", getPaddleEnvironment())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [{ data }, { data: access }] = await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("status, current_period_end, cancel_at_period_end, price_id")
+        .eq("user_id", user.id)
+        .eq("environment", getPaddleEnvironment())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase.from("pro_access").select("pro_until").eq("user_id", user.id).maybeSingle(),
+    ]);
     setSubscription((data as Subscription | null) ?? null);
+    setProUntil(access?.pro_until ?? null);
     setReady(true);
   }, [user]);
 
@@ -92,5 +99,13 @@ export function usePro(): {
     };
   }, [load, user]);
 
-  return { pro: computeActive(subscription), ready, subscription, refresh: () => void load() };
+  const promoActive = proUntil !== null && new Date(proUntil).getTime() > Date.now();
+
+  return {
+    pro: computeActive(subscription) || promoActive,
+    ready,
+    subscription,
+    proUntil,
+    refresh: () => void load(),
+  };
 }
