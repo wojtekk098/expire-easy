@@ -224,6 +224,15 @@ function AuthPage() {
               <Button type="submit" className="w-full" disabled={busy}>
                 {busy ? "Chwilka…" : mode === "signup" ? "Utwórz konto" : "Zaloguj się"}
               </Button>
+              <button
+                type="button"
+                className="w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+                onClick={handleForgotPassword}
+                disabled={busy}
+              >
+                Nie pamiętam hasła
+              </button>
+
             </form>
 
             <p className="text-center text-sm text-muted-foreground">
