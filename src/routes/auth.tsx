@@ -52,6 +52,28 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirm, setSentConfirm] = useState(false);
+  const [sentReset, setSentReset] = useState(false);
+
+  async function handleForgotPassword() {
+    const mail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+      toast.error("Najpierw wpisz swój adres e-mail");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(mail, {
+        redirectTo: `${window.location.origin}/reset-hasla`,
+      });
+      if (error) throw error;
+      setSentReset(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nie udało się wysłać linku");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
