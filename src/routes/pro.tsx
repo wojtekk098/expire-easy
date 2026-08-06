@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { PromoCodeForm } from "@/components/PromoCodeForm";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { getPaddleEnvironment, getPaddlePriceId, initializePaddle } from "@/lib/paddle";
