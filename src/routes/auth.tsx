@@ -152,7 +152,18 @@ function AuthPage() {
           <span className="text-lg font-semibold">Deadline</span>
         </div>
 
-        {sentConfirm ? (
+        {sentReset ? (
+          <div className="panel space-y-3 p-6">
+            <h1 className="text-lg font-semibold">Sprawdź skrzynkę</h1>
+            <p className="text-sm text-muted-foreground">
+              Wysłaliśmy link do zmiany hasła na <span className="font-medium">{email}</span>.
+              Kliknij go, aby ustawić nowe hasło.
+            </p>
+            <Button variant="outline" onClick={() => setSentReset(false)}>
+              Wróć
+            </Button>
+          </div>
+        ) : sentConfirm ? (
           <div className="panel space-y-3 p-6">
             <h1 className="text-lg font-semibold">Sprawdź skrzynkę</h1>
             <p className="text-sm text-muted-foreground">
@@ -164,6 +175,7 @@ function AuthPage() {
             </Button>
           </div>
         ) : (
+
           <div className="panel space-y-5 p-6">
             <div>
               <h1 className="text-lg font-semibold">
