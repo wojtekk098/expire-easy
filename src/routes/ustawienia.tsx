@@ -36,7 +36,19 @@ import {
   importGoogleCalendarEvents,
 } from "@/lib/gcal.functions";
 import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/connector-popup";
-import { getReminderSubscription, saveReminderSubscription } from "@/lib/reminders.functions";
+import {
+  deletePushDevice,
+  getPushPublicKey,
+  getReminderSubscription,
+  savePushDevice,
+  saveReminderSubscription,
+} from "@/lib/reminders.functions";
+import {
+  PUSH_SUPPORTED,
+  currentPushEndpoint,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push";
 import { PRO_PRICE_PLN, usePro } from "@/lib/pro";
 import { pageHead } from "@/lib/seo";
 
@@ -102,6 +114,11 @@ function SettingsPage() {
   const startGcal = useServerFn(startGoogleCalendarConnect);
   const importGcal = useServerFn(importGoogleCalendarEvents);
   const disconnectGcal = useServerFn(disconnectGoogleCalendar);
+  const pushKey = useServerFn(getPushPublicKey);
+  const savePush = useServerFn(savePushDevice);
+  const removePush = useServerFn(deletePushDevice);
+  const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -146,6 +163,48 @@ function SettingsPage() {
       .catch(() => undefined);
   }, [load]);
 
+
+  useEffect(() => {
+    if (!PUSH_SUPPORTED) return;
+    currentPushEndpoint()
+      .then((endpoint) => setPushOn(Boolean(endpoint)))
+      .catch(() => undefined);
+  }, []);
+
+  async function handlePushToggle(next: boolean) {
+    const token = localStorage.getItem(REMINDER_TOKEN_KEY);
+    if (next && !token) {
+      toast.error("Najpierw zapisz przypomnienia e-mail — potrzebujemy ich do powiązania urządzenia.");
+      return;
+    }
+    setPushBusy(true);
+    try {
+      if (next) {
+        const { publicKey } = await pushKey();
+        const device = await subscribeToPush(publicKey);
+        if (!device) {
+          toast.error("Nie udało się włączyć powiadomień — sprawdź zgodę w ustawieniach telefonu.");
+          return;
+        }
+        const result = await savePush({ data: { token: token!, ...device } });
+        if (!result.saved) {
+          toast.error("Nie znaleźliśmy Twoich przypomnień. Zapisz je ponownie i spróbuj jeszcze raz.");
+          return;
+        }
+        setPushOn(true);
+        toast.success("Powiadomienia w aplikacji włączone na tym urządzeniu");
+      } else {
+        const endpoint = await unsubscribeFromPush();
+        if (endpoint) await removePush({ data: { endpoint } });
+        setPushOn(false);
+        toast.success("Powiadomienia w aplikacji wyłączone na tym urządzeniu");
+      }
+    } catch {
+      toast.error("Nie udało się zmienić ustawień powiadomień");
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   async function handleSave() {
     const value = email.trim();
@@ -230,6 +289,32 @@ function SettingsPage() {
         <Button onClick={handleSave} disabled={saving}>
           {saving ? "Zapisywanie…" : "Zapisz ustawienia"}
         </Button>
+      </section>
+
+      <section className="panel space-y-4 p-5">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground">
+            <Smartphone className="size-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold">Powiadomienia w aplikacji</h2>
+            <p className="text-sm text-muted-foreground">
+              Po dodaniu aplikacji do ekranu głównego telefonu wyślemy powiadomienie systemowe
+              o godzinie ustawionej w danym terminie — nawet gdy aplikacja jest zamknięta.
+            </p>
+          </div>
+          <Switch
+            checked={pushOn}
+            disabled={!PUSH_SUPPORTED || pushBusy}
+            onCheckedChange={(v) => void handlePushToggle(v)}
+            aria-label="Włącz powiadomienia w aplikacji"
+          />
+        </div>
+        <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          {PUSH_SUPPORTED
+            ? "Ustawienie dotyczy tego urządzenia. Na iPhonie najpierw dodaj aplikację do ekranu głównego."
+            : "Ta przeglądarka nie obsługuje powiadomień systemowych. Otwórz aplikację na telefonie i dodaj ją do ekranu głównego."}
+        </p>
       </section>
 
 
