@@ -49,7 +49,6 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
   .inputValidator(
     (data: {
       token?: string;
-      email: string;
       enabled: boolean;
       phone?: string;
       smsEnabled?: boolean;
@@ -59,7 +58,6 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
       z
         .object({
           token: z.string().uuid().optional(),
-          email: emailSchema,
           enabled: z.boolean(),
           phone: z
             .string()
@@ -73,7 +71,7 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
         })
         .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { admin, normalizeItems, sendConfirmationEmail } = await import("./reminders.server");
     const supabase = await admin();
     const items = normalizeItems(data.items);
@@ -83,6 +81,14 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
     };
     const origin = data.origin ?? "https://mojdeadline.pl";
 
+    // Adres bierzemy wyłącznie z konta (token sesji) — użytkownik go nie podaje.
+    const claims = context.claims as Record<string, unknown>;
+    const email = emailSchema.parse(claims["email"]);
+    // Konto jest potwierdzone przy rejestracji, więc adres jest już zweryfikowany.
+    const emailVerified =
+      claims["email_verified"] === true ||
+      (claims["user_metadata"] as Record<string, unknown> | undefined)?.["email_verified"] === true;
+
     if (data.token) {
       const { data: existing } = await supabase
         .from("reminder_subscriptions")
@@ -91,18 +97,25 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
         .maybeSingle();
 
       if (existing) {
-        // Zmiana adresu unieważnia potwierdzenie — nowy adres musi
-        // samodzielnie potwierdzić zapis (double opt-in).
-        const emailChanged = existing.email !== data.email;
-        const confirmToken = emailChanged ? crypto.randomUUID() : (existing.confirm_token as string);
+        const emailChanged = existing.email !== email;
+        const confirmToken =
+          emailChanged || !existing.confirm_token
+            ? crypto.randomUUID()
+            : (existing.confirm_token as string);
+        const autoConfirm = emailVerified;
         const { data: row, error } = await supabase
           .from("reminder_subscriptions")
           .update({
-            email: data.email,
+            email,
             enabled: data.enabled,
             ...contact,
             items,
-            ...(emailChanged ? { confirmed_at: null, confirm_token: confirmToken } : {}),
+            confirm_token: confirmToken,
+            ...(autoConfirm
+              ? { confirmed_at: existing.confirmed_at ?? new Date().toISOString() }
+              : emailChanged
+                ? { confirmed_at: null }
+                : {}),
           })
           .eq("token", data.token)
           .select("token, confirmed_at")
@@ -110,7 +123,7 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
         if (error) throw new Error(error.message);
         if (row) {
           const confirmed = Boolean(row.confirmed_at);
-          if (!confirmed) await sendConfirmationEmail(data.email, confirmToken, origin);
+          if (!confirmed) await sendConfirmationEmail(email, confirmToken, origin);
           return { token: row.token as string, confirmed };
         }
       }
@@ -120,18 +133,21 @@ export const saveReminderSubscription = createServerFn({ method: "POST" })
     const { data: inserted, error: insertError } = await supabase
       .from("reminder_subscriptions")
       .insert({
-        email: data.email,
+        email,
         enabled: data.enabled,
         ...contact,
         items,
-        confirmed_at: null,
+        confirmed_at: emailVerified ? new Date().toISOString() : null,
         confirm_token: confirmToken,
       })
-      .select("token")
+      .select("token, confirmed_at")
       .single();
     if (insertError) throw new Error(insertError.message);
-    await sendConfirmationEmail(data.email, confirmToken, origin);
-    return { token: inserted.token as string, confirmed: false };
+
+    const confirmed = Boolean(inserted.confirmed_at);
+    if (!confirmed) await sendConfirmationEmail(email, confirmToken, origin);
+    return { token: inserted.token as string, confirmed };
+
   });
 
 export const syncReminderItems = createServerFn({ method: "POST" })

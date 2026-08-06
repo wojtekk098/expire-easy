@@ -101,7 +101,6 @@ function SettingsPage() {
   const [gcalBusy, setGcalBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
-  const [email, setEmail] = useState("");
   const [emailOn, setEmailOn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -146,16 +145,11 @@ function SettingsPage() {
   }, [user, gcalStatus]);
 
   useEffect(() => {
-    if (user?.email) setEmail((current) => current || user.email!);
-  }, [user]);
-
-  useEffect(() => {
     const token = localStorage.getItem(REMINDER_TOKEN_KEY);
     if (!token) return;
     load({ data: { token } })
       .then((sub) => {
         if (!sub) return;
-        setEmail(sub.email);
         setEmailOn(sub.enabled);
         setPhone(sub.phone);
         setSmsOn(sub.smsEnabled);
@@ -207,18 +201,12 @@ function SettingsPage() {
   }
 
   async function handleSave() {
-    const value = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      toast.error("Podaj poprawny adres e-mail");
-      return;
-    }
     setSaving(true);
     try {
       const token = localStorage.getItem(REMINDER_TOKEN_KEY);
       const result = await save({
         data: {
           ...(token ? { token } : {}),
-          email: value,
           enabled: emailOn,
           phone: phone.trim(),
           smsEnabled: smsOn,
@@ -229,12 +217,12 @@ function SettingsPage() {
       localStorage.setItem(REMINDER_TOKEN_KEY, result.token);
       if (!result.confirmed) {
         toast.success(
-          "Zapisano — wysłaliśmy link potwierdzający na ten adres. Przypomnienia ruszą po jego kliknięciu.",
+          "Zapisano — wysłaliśmy link potwierdzający na adres Twojego konta. Przypomnienia ruszą po jego kliknięciu.",
         );
       } else {
         toast.success(
           emailOn
-            ? "Zapisano — przypomnienia będą wysyłane na ten adres"
+            ? "Zapisano — przypomnienia będą wysyłane na adres Twojego konta"
             : "Zapisano — przypomnienia e-mail są wyłączone",
         );
       }
@@ -269,16 +257,12 @@ function SettingsPage() {
           <Switch checked={emailOn} onCheckedChange={setEmailOn} aria-label="Włącz e-maile" />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Adres e-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="np. anna@mojafirma.pl"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={!emailOn}
-          />
+        <div className="rounded-lg bg-muted px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Adres wysyłki: </span>
+          <span className="font-medium text-foreground">{user?.email ?? "—"}</span>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Przypomnienia wysyłamy na adres e-mail, na który założone jest Twoje konto.
+          </p>
         </div>
 
         <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
@@ -290,6 +274,7 @@ function SettingsPage() {
           {saving ? "Zapisywanie…" : "Zapisz ustawienia"}
         </Button>
       </section>
+
 
       <section className="panel space-y-4 p-5">
         <div className="flex min-w-0 items-start gap-3">
