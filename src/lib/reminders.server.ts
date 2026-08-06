@@ -134,6 +134,71 @@ export function todayIn(timezone: string): string {
   return fmt.format(new Date());
 }
 
+/** Aktualna godzina (0-23) w strefie subskrypcji. */
+export function hourIn(timezone: string): number {
+  const value = new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone || "Europe/Warsaw",
+    hour: "2-digit",
+    hour12: false,
+  }).format(new Date());
+  return Number(value.slice(0, 2));
+}
+
+/** Godzina powiadomienia zapisana w terminie (domyślnie 0 = 00:00). */
+export function notifyHour(item: Item): number {
+  const raw = String(item.notify_time ?? "00:00");
+  const parsed = Number(raw.slice(0, 2));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Wysyła powiadomienie push do wszystkich urządzeń danej subskrypcji. */
+export async function sendPushNotifications(
+  subscriptionId: string,
+  title: string,
+  body: string,
+): Promise<number> {
+  const publicKey = process.env["VAPID_PUBLIC_KEY"];
+  const privateKey = process.env["VAPID_PRIVATE_KEY"];
+  if (!publicKey || !privateKey) return 0;
+  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:kontakt@mojdeadline.pl";
+
+  const supabase = await admin();
+  const { data: devices } = await supabase
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth")
+    .eq("subscription_id", subscriptionId);
+  if (!devices?.length) return 0;
+
+  const { buildPushPayload } = await import("@block65/webcrypto-web-push");
+  let sent = 0;
+
+  for (const device of devices) {
+    try {
+      const payload = await buildPushPayload(
+        { data: { title, body, url: "/" }, options: { ttl: 60 * 60 * 24 } },
+        {
+          endpoint: device.endpoint as string,
+          expirationTime: null,
+          keys: { p256dh: device.p256dh as string, auth: device.auth as string },
+        },
+        { subject, publicKey, privateKey },
+      );
+      const response = await fetch(device.endpoint as string, payload);
+      if (response.ok) {
+        sent += 1;
+      } else if (response.status === 404 || response.status === 410) {
+        await supabase.from("push_subscriptions").delete().eq("id", device.id as string);
+      } else {
+        console.error(`Web push failed [${response.status}]: ${await response.text()}`);
+      }
+    } catch (error) {
+      console.error("Web push error", error);
+    }
+  }
+
+  return sent;
+}
+
 /** Różnica dni między datą terminu i „dziś” (obie jako YYYY-MM-DD). */
 export function daysBetweenISO(fromISO: string, toISODate: string): number {
   const a = Date.parse(`${fromISO}T00:00:00Z`);
