@@ -88,8 +88,22 @@ export function DeadlineProvider({ children }: { children: ReactNode }) {
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
+// Podczas przekierowania na /auth komponenty chronionych stron mogą zdążyć
+// wyrenderować się poza providerem — wtedy zwracamy pusty, bezpieczny store
+// zamiast rzucać błąd (co dawało białą stronę).
+const FALLBACK_STORE: Store = {
+  items: [],
+  categories: DEFAULT_CATEGORIES,
+  ready: false,
+  addItem: () => {},
+  updateItem: () => {},
+  deleteItem: () => {},
+  addCategory: () => {},
+  deleteCategory: () => {},
+};
+
 export function useDeadlines(): Store {
   const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useDeadlines musi być użyte wewnątrz DeadlineProvider");
-  return ctx;
+  return ctx ?? FALLBACK_STORE;
 }
+
