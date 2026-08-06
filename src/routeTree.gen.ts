@@ -18,6 +18,7 @@ import { Route as PozycjeRouteImport } from './routes/pozycje'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as PrywatnoscRouteImport } from './routes/prywatnosc'
 import { Route as RegulaminRouteImport } from './routes/regulamin'
+import { Route as ResetHaslaRouteImport } from './routes/reset-hasla'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as ZwrotyRouteImport } from './routes/zwroty'
@@ -74,6 +75,11 @@ const PrywatnoscRoute = PrywatnoscRouteImport.update({
 const RegulaminRoute = RegulaminRouteImport.update({
   id: '/regulamin',
   path: '/regulamin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetHaslaRoute = ResetHaslaRouteImport.update({
+  id: '/reset-hasla',
+  path: '/reset-hasla',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/reset-hasla': typeof ResetHaslaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/reset-hasla': typeof ResetHaslaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/pro': typeof ProRoute
   '/prywatnosc': typeof PrywatnoscRoute
   '/regulamin': typeof RegulaminRoute
+  '/reset-hasla': typeof ResetHaslaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ustawienia': typeof UstawieniaRoute
   '/zwroty': typeof ZwrotyRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/reset-hasla'
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/reset-hasla'
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/prywatnosc'
     | '/regulamin'
+    | '/reset-hasla'
     | '/sitemap.xml'
     | '/ustawienia'
     | '/zwroty'
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   ProRoute: typeof ProRoute
   PrywatnoscRoute: typeof PrywatnoscRoute
   RegulaminRoute: typeof RegulaminRoute
+  ResetHaslaRoute: typeof ResetHaslaRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UstawieniaRoute: typeof UstawieniaRoute
   ZwrotyRoute: typeof ZwrotyRoute
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/regulamin'
       fullPath: '/regulamin'
       preLoaderRoute: typeof RegulaminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-hasla': {
+      id: '/reset-hasla'
+      path: '/reset-hasla'
+      fullPath: '/reset-hasla'
+      preLoaderRoute: typeof ResetHaslaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProRoute: ProRoute,
   PrywatnoscRoute: PrywatnoscRoute,
   RegulaminRoute: RegulaminRoute,
+  ResetHaslaRoute: ResetHaslaRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UstawieniaRoute: UstawieniaRoute,
   ZwrotyRoute: ZwrotyRoute,
