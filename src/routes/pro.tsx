@@ -139,9 +139,12 @@ function ProPage() {
             </>
           ) : user ? (
             <>
-              <Button onClick={handleSubscribe} disabled={loading}>
-                {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
-              </Button>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button onClick={handleSubscribe} disabled={loading}>
+                  {loading ? "Otwieram płatność…" : `Wykup dostęp — ${PRO_PRICE_PLN} zł/mies.`}
+                </Button>
+                <PromoCodeForm onRedeemed={refresh} />
+              </div>
               <p className="text-xs text-muted-foreground">
                 Proces zamówienia obsługuje nasz sprzedawca internetowy Paddle.com — Paddle.com jest
                 sprzedawcą (Merchant of Record) wszystkich zamówień, obsługuje zapytania obsługi
@@ -153,7 +156,6 @@ function ProPage() {
                   ? " Podgląd działa w trybie testowym — użyj karty 4242 4242 4242 4242."
                   : ""}
               </p>
-
             </>
           ) : (
             <>
