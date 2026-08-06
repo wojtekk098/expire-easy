@@ -6,6 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import path from "node:path";
 
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { loadEnv } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -35,6 +36,7 @@ export default defineConfig({
       },
     },
     plugins: [
+      mcpPlugin(),
       VitePWA({
         strategies: "generateSW",
         registerType: "autoUpdate",

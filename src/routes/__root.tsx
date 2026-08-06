@@ -144,7 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-const PUBLIC_PATHS = ["/auth", "/potwierdz-przypomnienia", "/regulamin", "/prywatnosc", "/zwroty", "/oauth"];
+const PUBLIC_PATHS = ["/auth", "/potwierdz-przypomnienia", "/regulamin", "/prywatnosc", "/zwroty", "/oauth", "/.lovable"];
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
