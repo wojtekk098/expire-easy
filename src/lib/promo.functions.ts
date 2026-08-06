@@ -22,35 +22,24 @@ export const redeemPromoCode = createServerFn({ method: "POST" })
       .eq("code", data.code)
       .maybeSingle();
 
-    if (!promo || !promo.is_active) return { ok: false as const, error: "invalid" };
+    if (!promo || !promo.is_active) return { ok: false as const, error: "invalid" as const };
     if (promo.expires_at && new Date(promo.expires_at).getTime() < Date.now()) {
-      return { ok: false as const, error: "invalid" };
+      return { ok: false as const, error: "invalid" as const };
     }
     if (promo.max_uses !== null && promo.current_uses >= promo.max_uses) {
-      return { ok: false as const, error: "limit" };
+      return { ok: false as const, error: "limit" as const };
     }
 
     const { error: redemptionError } = await supabaseAdmin
       .from("promo_code_redemptions")
       .insert({ user_id: userId, promo_code_id: promo.id });
     if (redemptionError) {
-      if (redemptionError.code === "23505" || redemptionError.code === "23405") {
-        return { ok: false as const, error: "already" };
-      }
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23_505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
-      if (redemptionError.code === "23505") return { ok: false as const, error: "already" };
+      if (redemptionError.code === "23505") return { ok: false as const, error: "already" as const };
       console.error("Promo redemption insert failed", redemptionError);
-      return { ok: false as const, error: "invalid" };
+      return { ok: false as const, error: "invalid" as const };
     }
 
-    // Nie skracamy istniejącego dostępu — przedłużamy od późniejszej z dat.
+    // Nie skracamy istniejącego dostępu — liczymy od późniejszej z dat.
     const { data: access } = await supabaseAdmin
       .from("pro_access")
       .select("pro_until")
@@ -65,12 +54,11 @@ export const redeemPromoCode = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    const candidates = [
+    const base = Math.max(
       Date.now(),
       access?.pro_until ? new Date(access.pro_until).getTime() : 0,
       sub?.current_period_end ? new Date(sub.current_period_end).getTime() : 0,
-    ];
-    const base = Math.max(...candidates);
+    );
     const proUntil = new Date(base + promo.duration_days * 24 * 60 * 60 * 1000).toISOString();
 
     const { error: accessError } = await supabaseAdmin
@@ -78,7 +66,7 @@ export const redeemPromoCode = createServerFn({ method: "POST" })
       .upsert({ user_id: userId, pro_until: proUntil }, { onConflict: "user_id" });
     if (accessError) {
       console.error("Pro access upsert failed", accessError);
-      return { ok: false as const, error: "invalid" };
+      return { ok: false as const, error: "invalid" as const };
     }
 
     await supabaseAdmin
